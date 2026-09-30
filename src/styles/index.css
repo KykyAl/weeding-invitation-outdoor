@@ -1,0 +1,162 @@
+@import 'tailwindcss';
+
+@theme {
+  /* Palette — indoor wedding: ivory, cream, sage, soft gold, dark brown text. */
+  --color-ivory: #fbf8f1;
+  --color-cream: #f7f1e6;
+  --color-linen: #efe6d6;
+  --color-beige: #e2d4bd;
+  --color-sage: #9fae94;
+  --color-sage-deep: #5f7259;
+  --color-forest: #34453a;
+  --color-gold: #b8975a;
+  --color-gold-soft: #d8c295;
+  --color-cocoa: #4a3a2e;
+  --color-cocoa-soft: #7a6757;
+
+  --font-serif: 'Cormorant Garamond', 'Times New Roman', serif;
+  --font-sans: 'Jost', system-ui, sans-serif;
+  --font-script: 'Pinyon Script', 'Cormorant Garamond', cursive;
+
+  --ease-cinematic: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  /* Mobile portrait is the primary target; desktop gets a centred 9:16 stage. */
+  --stage-width: min(100vw, 480px, calc(100dvh * 9 / 16 + 80px));
+  color-scheme: light;
+}
+
+@media (max-width: 540px) {
+  :root {
+    --stage-width: 100vw;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: auto;
+  }
+
+  html.is-locked,
+  html.is-locked body,
+  html.is-lightbox,
+  html.is-lightbox body {
+    overflow: hidden;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background-color: var(--color-linen);
+    color: var(--color-cocoa);
+    font-family: var(--font-sans);
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--color-gold);
+    outline-offset: 4px;
+  }
+
+  ::selection {
+    background: var(--color-gold-soft);
+    color: var(--color-cocoa);
+  }
+}
+
+@layer components {
+  /* Small spaced uppercase label: "THE WEDDING OF", dates, etc. */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 400;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--color-cocoa-soft);
+  }
+
+  .display-names {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    color: var(--color-cocoa);
+  }
+
+  /* Thin animated line under the "Scroll" cue. */
+  .scroll-cue {
+    position: relative;
+    display: block;
+    width: 1px;
+    height: 2.75rem;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--color-gold) 25%, transparent);
+  }
+
+  .scroll-cue::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--color-gold);
+    transform: translateY(-100%);
+    animation: scroll-cue 2.4s var(--ease-cinematic) infinite;
+  }
+
+  .hairline {
+    height: 1px;
+    width: 3rem;
+    background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+  }
+}
+
+/* Lightbox photo fades in on every change. */
+.lightbox-image {
+  animation: lightbox-in 0.6s var(--ease-cinematic);
+}
+
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+/* Chandelier: a slow pendulum. */
+.venue-sway {
+  animation: venue-sway 7s ease-in-out infinite alternate;
+}
+
+@keyframes venue-sway {
+  from {
+    rotate: -1.2deg;
+  }
+  to {
+    rotate: 1.2deg;
+  }
+}
+
+@keyframes scroll-cue {
+  0% {
+    transform: translateY(-100%);
+  }
+  60%,
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

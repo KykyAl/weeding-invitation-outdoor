@@ -1,0 +1,57 @@
+import { useRef, type ReactNode } from 'react'
+import type { SceneId } from '@/scenes/timeline'
+import { useSceneTimeline } from '@/hooks/useSceneTimeline'
+
+interface SceneSectionProps {
+  id: SceneId
+  label: string
+  children: ReactNode
+  className?: string
+  /** Scroll length in viewport heights. */
+  length?: number
+  /**
+   * Pinned scenes hold their content on screen (sticky) while the camera
+   * moves, then fade it out before the next scene — like a shot, not a page.
+   */
+  pin?: boolean
+  /** When set, content plays in on a timer once `true` instead of on scroll. */
+  play?: boolean
+  /** Pinned scenes: ScrollTrigger [start, end] for the intro (relative to the section top). */
+  revealAt?: [start: string, end: string]
+}
+
+/** Semantic wrapper for a scene. Children marked `data-reveal` animate in sequence. */
+export function SceneSection({
+  id,
+  label,
+  children,
+  className = '',
+  length = 1,
+  pin = false,
+  play,
+  revealAt,
+}: SceneSectionProps) {
+  const sectionRef = useRef<HTMLElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  useSceneTimeline(sectionRef, contentRef, { pin, play, revealAt })
+
+  return (
+    <section
+      ref={sectionRef}
+      id={id}
+      aria-label={label}
+      data-scene={id}
+      style={{ minHeight: `${length * 100}dvh` }}
+      className="relative"
+    >
+      <div
+        ref={contentRef}
+        className={`flex flex-col items-center text-center ${
+          pin ? 'sticky top-0 h-dvh justify-center px-8' : 'min-h-dvh justify-center px-8 py-24'
+        } ${className}`}
+      >
+        {children}
+      </div>
+    </section>
+  )
+}

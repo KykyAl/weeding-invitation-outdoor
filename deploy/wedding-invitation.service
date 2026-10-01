@@ -1,0 +1,18 @@
+# Template — deploy.sh fills in @NODE@, @APP_DIR@ and @ENV_FILE@.
+[Unit]
+Description=Wedding invitation (frontend + wedding-api)
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=@APP_DIR@/api
+EnvironmentFile=@ENV_FILE@
+ExecStart=@NODE@ dist/server.js
+Restart=on-failure
+RestartSec=3
+# Lets in-flight requests finish (server.ts shuts down gracefully on SIGTERM).
+TimeoutStopSec=15
+
+[Install]
+WantedBy=default.target

@@ -33,6 +33,7 @@ cp .env.example .env   # then edit the values
 | `JWT_EXPIRES_IN` | `7d` | token lifetime (`12h`, `7d`, …) |
 | `CORS_ORIGIN` | `http://localhost:5173` | comma-separated frontend origins; nothing is hardcoded |
 | `TRUST_PROXY` | `0` | set to `1` behind one reverse proxy so rate limits see real IPs |
+| `FRONTEND_DIST` | `../dist` | optional; serve the built frontend + link previews (see below) |
 | `TEST_DATABASE_URL` | `postgresql://wedding:secret@localhost:5432/wedding_test` | only for `npm test` |
 | `SEED_ADMIN_PASSWORD` | | optional; admin password for `npm run seed` (default `admin12345`, dev only) |
 
@@ -64,11 +65,12 @@ re-running only applies new files. To add a change, create `007_something.sql`.
 npm run seed
 ```
 
-This creates the placeholder wedding `example-wedding` (Example Groom & Example
-Bride at Example Wedding Hall, with 2 events, 4 stories and 3 gallery URLs) and the
+This creates the placeholder wedding `example-wedding` (Mempelai Pria & Mempelai
+Wanita at Gedung Pernikahan, with 2 events, 4 stories and 3 gallery URLs) and the
 admin user `admin` / `admin12345`. It is safe to re-run: the example wedding is
-recreated, including its RSVPs. In production, seeding requires
-`SEED_ADMIN_PASSWORD`.
+recreated, including its RSVPs. An existing admin is left untouched, so a changed
+password is never reset; use `npm run create-admin` to change it. In production,
+seeding requires `SEED_ADMIN_PASSWORD`.
 
 ## 7. Run development
 
@@ -94,6 +96,7 @@ dev dependencies are installed, or apply the SQL files with `psql -f`.
 |---|---|---|---|
 | GET | `/health` | – | process is up |
 | GET | `/ready` | – | database reachable (`503` if not) |
+| GET | `/wedding/:slug` | – | invitation page with link-preview tags (only with `FRONTEND_DIST`) |
 | GET | `/api/v1/weddings/:slug` | – | **everything the invitation page needs** |
 | POST | `/api/v1/weddings/:slug/rsvp` | – | submit RSVP (rate limited: 10 / 15 min / IP) |
 | POST | `/api/v1/auth/login` | – | admin login → JWT (rate limited: 10 / 15 min / IP) |
@@ -112,6 +115,26 @@ dev dependencies are installed, or apply the SQL files with `psql -f`.
 `PUT` replaces the whole record: send every field you want to keep, and omitted
 optional fields become `null`. URLs must be `http(s)`. Dates use `YYYY-MM-DD`
 and times use `HH:MM`.
+
+### Link previews (WhatsApp)
+
+Crawlers from WhatsApp, Telegram and Facebook don't run JavaScript. When
+`FRONTEND_DIST` points at the built frontend, this server also serves the app,
+and `GET /wedding/:slug` gets Open Graph tags filled in on the server:
+
+| Tag | Value |
+|---|---|
+| `og:title` | `Pernikahan {groom.name} & {bride.name}` |
+| `og:description` | `Kepada Yth. {to} · {tanggal} · {venue}` (the guest part only when `?to=` is present) |
+| `og:image` | the first gallery photo that is **JPEG/PNG** (WebP is unreliable in WhatsApp), otherwise the illustrated `og-image.jpg` (1200×630, ~100 kB) |
+
+- All values are HTML-escaped.
+- An unknown slug returns `404` with the app, which shows its own "not found" screen.
+- Files in `assets/` are cached for a year (they are fingerprinted), and the page itself uses `no-cache`.
+
+One server then serves both the API and the invitation. If the frontend is
+hosted elsewhere instead, route `/wedding/*` to this server through your proxy,
+or previews will show only the generic title.
 
 **Guest personalization** (`/wedding/:slug?to=Andi`) is handled entirely in the
 frontend. The backend never sees or stores `to`.
@@ -155,14 +178,14 @@ curl http://localhost:8080/api/v1/weddings/example-wedding
   "data": {
     "id": "07b43587-…",
     "slug": "example-wedding",
-    "groom": { "name": "Example Groom", "fullName": "Example Groom Full Name" },
-    "bride": { "name": "Example Bride", "fullName": "Example Bride Full Name" },
+    "groom": { "name": "Mempelai Pria", "fullName": "Nama Lengkap Mempelai Pria" },
+    "bride": { "name": "Mempelai Wanita", "fullName": "Nama Lengkap Mempelai Wanita" },
     "weddingDate": "2026-11-11",
     "quote": { "text": "Dan di antara tanda-tanda kebesaran-Nya…", "source": "QS. Ar-Rum: 21" },
-    "venue": { "name": "Example Wedding Hall", "address": "Jl. Contoh No. 1, Kota Contoh", "mapsUrl": "https://maps.google.com/?q=Example+Wedding+Hall" },
+    "venue": { "name": "Gedung Pernikahan", "address": "Jl. Contoh No. 1, Kota Contoh", "mapsUrl": "https://maps.google.com/?q=Gedung+Pernikahan" },
     "events": [
       { "id": "…", "type": "akad", "title": "Akad Nikah", "date": "2026-11-11", "startTime": "08:00", "endTime": "10:00",
-        "venue": { "name": "Example Wedding Hall", "address": "Jl. Contoh No. 1, Kota Contoh" }, "sortOrder": 1 }
+        "venue": { "name": "Gedung Pernikahan", "address": "Jl. Contoh No. 1, Kota Contoh" }, "sortOrder": 1 }
     ],
     "stories": [ { "id": "…", "year": 2019, "title": "Awal Bertemu", "description": "…", "sortOrder": 1 } ],
     "gallery": [ { "id": "…", "imageUrl": "https://cdn.example.com/example-wedding/photo-1.webp", "caption": "Foto contoh 1", "sortOrder": 1 } ],
@@ -210,7 +233,7 @@ src/
   config/env.ts            validated environment
   db/pool.ts               the single pg.Pool
   middleware/              auth (JWT), errorHandler (AppError + one error format), notFound
-  controllers/             wedding (public + admin CRUD), rsvp, auth
+  controllers/             wedding (public + admin CRUD), rsvp, auth, page (link previews)
   routes/                  public, auth, admin
   schemas/                 Zod schemas + validate()
   types/wedding.ts         DB rows and API shapes

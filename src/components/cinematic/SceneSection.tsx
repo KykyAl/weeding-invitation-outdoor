@@ -19,6 +19,8 @@ interface SceneSectionProps {
   play?: boolean
   /** Pinned scenes: ScrollTrigger [start, end] for the intro (relative to the section top). */
   revealAt?: [start: string, end: string]
+  /** Pinned scenes fade out before the next one; the final scene stays. */
+  fadeOut?: boolean
 }
 
 /** Semantic wrapper for a scene. Children marked `data-reveal` animate in sequence. */
@@ -31,10 +33,11 @@ export function SceneSection({
   pin = false,
   play,
   revealAt,
+  fadeOut = true,
 }: SceneSectionProps) {
   const sectionRef = useRef<HTMLElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
-  useSceneTimeline(sectionRef, contentRef, { pin, play, revealAt })
+  useSceneTimeline(sectionRef, contentRef, { pin, play, revealAt, fadeOut })
 
   return (
     <section

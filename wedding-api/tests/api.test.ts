@@ -39,10 +39,10 @@ describe('GET /api/v1/weddings/:slug', () => {
     const w = res.body.data
     expect(w).toMatchObject({
       slug: SEED_SLUG,
-      groom: { name: 'Example Groom', fullName: 'Example Groom Full Name' },
-      bride: { name: 'Example Bride' },
+      groom: { name: 'Mempelai Pria', fullName: 'Nama Lengkap Mempelai Pria' },
+      bride: { name: 'Mempelai Wanita' },
       weddingDate: '2026-11-11',
-      venue: { name: 'Example Wedding Hall' },
+      venue: { name: 'Gedung Pernikahan' },
       music: null,
     })
     expect(w.events.map((e: { title: string }) => e.title)).toEqual(['Akad Nikah', 'Resepsi'])
@@ -143,5 +143,31 @@ describe('admin API', () => {
     expect((await request(app).get('/api/v1/weddings/another-wedding')).body.data.events).toHaveLength(1)
     expect((await request(app).delete(`/api/v1/admin/weddings/${id}`).set(auth)).status).toBe(200)
     expect((await request(app).get('/api/v1/weddings/another-wedding')).status).toBe(404)
+  })
+})
+
+describe('invitation page (link previews)', () => {
+  it('fills in per-wedding and per-guest Open Graph tags', async () => {
+    const res = await request(app).get(`/wedding/${SEED_SLUG}?to=Andi`)
+    expect(res.status).toBe(200)
+    expect(res.type).toBe('text/html')
+    expect(res.text).toContain('<meta property="og:title" content="Pernikahan Mempelai Pria &amp; Mempelai Wanita" />')
+    expect(res.text).toContain('Kepada Yth. Andi · Rabu, 11 November 2026 · Gedung Pernikahan')
+    // The seed's photos are WebP, which WhatsApp previews don't handle reliably → illustrated default.
+    expect(res.text).toMatch(/<meta property="og:image" content="http:\/\/127\.0\.0\.1:\d+\/og-image\.jpg" \/>/)
+    expect(res.text).toContain('<title>Pernikahan Mempelai Pria &amp; Mempelai Wanita</title>')
+    expect(res.text).not.toContain('og:start')
+  })
+
+  it('escapes the guest name', async () => {
+    const res = await request(app).get(`/wedding/${SEED_SLUG}?to=${encodeURIComponent('"><script>alert(1)</script>')}`)
+    expect(res.text).not.toContain('<script>alert(1)')
+    expect(res.text).toContain('Kepada Yth. &quot;&gt;&lt;script&gt;')
+  })
+
+  it('serves the app with a 404 for an unknown wedding', async () => {
+    const res = await request(app).get('/wedding/does-not-exist')
+    expect(res.status).toBe(404)
+    expect(res.text).toContain('<div id="root">')
   })
 })

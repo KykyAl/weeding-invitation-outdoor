@@ -118,6 +118,37 @@
   }
 }
 
+/* Gallery frame whose photo could not be loaded: a quiet placeholder. */
+.photo-frame {
+  position: relative;
+}
+
+.photo-frame[data-failed] {
+  background: radial-gradient(ellipse at 50% 40%, var(--color-ivory), var(--color-linen) 70%, var(--color-beige));
+}
+
+.photo-frame[data-failed]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 26%;
+  aspect-ratio: 1;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='%23b8975a'%3E%3Cpath d='M20 34C13 27 12 16 20 6c8 10 7 21 0 28Z' opacity='.55'/%3E%3Cpath d='M20 34c-6-1-12-6-14-14 7 0 12 5 14 14Zm0 0c6-1 12-6 14-14-7 0-12 5-14 14Z' opacity='.35'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Loading: the hairlines breathe while the invitation is fetched. */
+.status-pulse {
+  animation: status-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes status-pulse {
+  50% {
+    opacity: 0.35;
+    transform: scaleX(0.6);
+  }
+}
+
 /* Lightbox photo fades in on every change. */
 .lightbox-image {
   animation: lightbox-in 0.6s var(--ease-cinematic);

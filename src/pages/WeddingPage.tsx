@@ -25,6 +25,7 @@ export function WeddingPage({ slug }: { slug: string }) {
       return (
         <StatusScreen title={state.offline ? copy.status.offline : copy.status.error}>
           <p>{state.message}</p>
+          {import.meta.env.DEV && <p className="mt-3 text-xs">{copy.status.devApiDown}</p>}
           <InviteButton onClick={retry} className="mt-6">
             {copy.status.retry}
           </InviteButton>

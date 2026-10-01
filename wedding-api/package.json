@@ -15,7 +15,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.dev.json",
     "migrate": "tsx scripts/migrate.ts",
     "seed": "tsx scripts/seed.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "create-admin": "tsx scripts/create-admin.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

@@ -117,7 +117,7 @@ export function GalleryTrack({ images, onOpen }: GalleryTrackProps) {
                   FRAMES[i % FRAMES.length]
                 }`}
               >
-                <span className={`block overflow-hidden ${FRAMES[i % FRAMES.length]}`} style={{ aspectRatio: ratio }}>
+                <span className={`photo-frame block overflow-hidden ${FRAMES[i % FRAMES.length]}`} style={{ aspectRatio: ratio }}>
                   <img
                     src={image.thumbnailUrl ?? image.url}
                     alt={image.alt}
@@ -125,8 +125,11 @@ export function GalleryTrack({ images, onOpen }: GalleryTrackProps) {
                     height={image.height}
                     loading="lazy"
                     decoding="async"
-                    // A missing file leaves the soft frame instead of a broken-image icon.
-                    onError={(e) => (e.currentTarget.style.visibility = 'hidden')}
+                    // A missing file shows a soft placeholder frame instead of a broken-image icon.
+                    onError={(e) => {
+                      e.currentTarget.style.visibility = 'hidden'
+                      e.currentTarget.parentElement?.setAttribute('data-failed', '')
+                    }}
                     className="h-full w-full object-cover"
                   />
                 </span>

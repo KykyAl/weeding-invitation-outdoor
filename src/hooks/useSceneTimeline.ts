@@ -7,6 +7,7 @@ interface SceneTimelineOptions {
   /** Time-based intro gate; `undefined` means the intro is driven by scroll. */
   play?: boolean
   revealAt?: [start: string, end: string]
+  fadeOut?: boolean
 }
 
 const DEFAULT_REVEAL: [string, string] = ['top 5%', 'top -40%']
@@ -24,7 +25,7 @@ const DEFAULT_REVEAL: [string, string] = ['top 5%', 'top -40%']
 export function useSceneTimeline(
   section: RefObject<HTMLElement | null>,
   content: RefObject<HTMLElement | null>,
-  { pin, play, revealAt }: SceneTimelineOptions,
+  { pin, play, revealAt, fadeOut = true }: SceneTimelineOptions,
 ) {
   const reducedMotion = useReducedMotion()
   const [revealStart, revealEnd] = revealAt ?? DEFAULT_REVEAL
@@ -65,7 +66,7 @@ export function useSceneTimeline(
         }
       }
 
-      if (pin) {
+      if (pin && fadeOut) {
         gsap.fromTo(
           inner,
           { opacity: 1, y: 0 },
@@ -87,5 +88,5 @@ export function useSceneTimeline(
     }, el)
 
     return () => ctx.revert()
-  }, [section, content, pin, play, revealStart, revealEnd, reducedMotion])
+  }, [section, content, pin, play, revealStart, revealEnd, fadeOut, reducedMotion])
 }

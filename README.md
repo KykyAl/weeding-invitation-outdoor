@@ -22,8 +22,19 @@ then open e.g. `/wedding/example-wedding?to=Andi`.
 - `VITE_USE_SAMPLE_DATA=true`: dev only; uses the local sample in `src/data/`
   instead of the backend, e.g. `/wedding/sample-wedding`.
 
+**Link previews (WhatsApp):** serve the build through `wedding-api`
+(`FRONTEND_DIST=../dist`) so `/wedding/:slug` gets per-invitation Open Graph tags.
+`public/og-image.jpg` is the generic preview image, composed from the hall
+illustration. See [wedding-api/README.md](wedding-api/README.md#link-previews-whatsapp).
+
 How the frontend maps backend fields, handles errors and retries is described
 in [docs/API.md](docs/API.md).
+
+## Deploy
+
+One command builds, migrates and (re)starts everything as a systemd user service:
+`./deploy/deploy.sh`. Operations, admin, backups and moving to a VPS with a domain
+and HTTPS are covered in [deploy/README.md](deploy/README.md).
 
 ## Structure
 
@@ -111,4 +122,4 @@ browser's accessibility tree.
 5. ✅ Backend integration with `wedding-api` (validated payloads, retries, offline recovery)
 6. ✅ Performance (adaptive renderer, deferred WebGL, progressive layers)
 7. ✅ Accessibility (WCAG 2.2 AA audit, keyboard, screen readers)
-8. Final polish
+8. ✅ Final polish (cinematic closing, event map fallback, photo placeholders, no white flash)

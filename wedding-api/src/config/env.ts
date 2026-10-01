@@ -4,12 +4,16 @@ import { z } from 'zod'
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(8080),
+  /** Interface to listen on; use 127.0.0.1 behind a reverse proxy such as Nginx. */
+  HOST: z.string().default('0.0.0.0'),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
   JWT_EXPIRES_IN: z.string().default('7d'),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
   /** Number of reverse proxies in front of the app (for correct client IPs in rate limiting). */
   TRUST_PROXY: z.coerce.number().int().min(0).default(0),
+  /** Optional: path to the built frontend (`dist/`). When set, this app also serves the invitation pages with link-preview tags. */
+  FRONTEND_DIST: z.string().optional(),
 })
 
 const parsed = schema.safeParse(process.env)

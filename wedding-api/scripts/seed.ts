@@ -1,6 +1,7 @@
 /**
  * Development seed with PLACEHOLDER data only (slug `example-wedding`).
- * Safe to re-run: the example wedding is recreated and the admin user upserted.
+ * Safe to re-run: the example wedding is recreated; the admin user is created
+ * only if it doesn't exist yet (use `npm run create-admin` to change a password).
  */
 import bcrypt from 'bcrypt'
 import { fileURLToPath } from 'node:url'
@@ -25,24 +26,24 @@ export async function seed(log = console.log) {
        RETURNING id`,
       [
         SEED_SLUG,
-        'Example Groom',
-        'Example Groom Full Name',
-        'Example Bride',
-        'Example Bride Full Name',
+        'Mempelai Pria',
+        'Nama Lengkap Mempelai Pria',
+        'Mempelai Wanita',
+        'Nama Lengkap Mempelai Wanita',
         '2026-11-11',
         'Dan di antara tanda-tanda kebesaran-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu merasa tenteram kepadanya.',
         'QS. Ar-Rum: 21',
-        'Example Wedding Hall',
+        'Gedung Pernikahan',
         'Jl. Contoh No. 1, Kota Contoh',
-        'https://maps.google.com/?q=Example+Wedding+Hall',
+        'https://maps.google.com/?q=Gedung+Pernikahan',
         null,
       ],
     )
     const weddingId = rows[0].id
 
     const events = [
-      ['akad', 'Akad Nikah', '2026-11-11', '08:00', '10:00', 'Example Wedding Hall', 'Jl. Contoh No. 1, Kota Contoh', 1],
-      ['reception', 'Resepsi', '2026-11-11', '11:00', '14:00', 'Example Wedding Hall', 'Jl. Contoh No. 1, Kota Contoh', 2],
+      ['akad', 'Akad Nikah', '2026-11-11', '08:00', '10:00', 'Gedung Pernikahan', 'Jl. Contoh No. 1, Kota Contoh', 1],
+      ['reception', 'Resepsi', '2026-11-11', '11:00', '14:00', 'Gedung Pernikahan', 'Jl. Contoh No. 1, Kota Contoh', 2],
     ]
     for (const e of events) {
       await client.query(
@@ -77,10 +78,11 @@ export async function seed(log = console.log) {
       ])
     }
 
+    // Creates the admin only if missing — never resets an existing (e.g. production) password.
     const hash = await bcrypt.hash(SEED_ADMIN.password, 12)
     await client.query(
       `INSERT INTO admin_users (username, password_hash) VALUES ($1, $2)
-       ON CONFLICT (username) DO UPDATE SET password_hash = EXCLUDED.password_hash`,
+       ON CONFLICT (username) DO NOTHING`,
       [SEED_ADMIN.username, hash],
     )
 

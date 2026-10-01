@@ -146,7 +146,12 @@ const DEFAULT_EVENT_TITLE: Record<WeddingEventType, string> = {
 
 function event(raw: Raw, i: number, fallbackVenue?: Venue, fallbackTz?: string): WeddingEvent | undefined {
   const startAt = date(raw.startAt) ?? dateTime(raw.date, raw.startTime)
-  const eventVenue = venue(raw.venue) ?? fallbackVenue
+  const own = venue(raw.venue)
+  // Same place as the main venue but no map link of its own → reuse the main one.
+  const eventVenue =
+    own && !own.mapUrl && fallbackVenue?.mapUrl && own.name === fallbackVenue.name
+      ? { ...own, mapUrl: fallbackVenue.mapUrl }
+      : (own ?? fallbackVenue)
   if (!startAt || !eventVenue) return undefined
   const type = oneOf(raw.type, EVENT_TYPES) ?? 'other'
   const endAt = date(raw.endAt) ?? (str(raw.endTime) ? dateTime(raw.date, raw.endTime) : undefined)

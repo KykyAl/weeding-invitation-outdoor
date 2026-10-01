@@ -35,7 +35,7 @@ export const copy = {
   },
   gallery: {
     heading: 'Momen Kami',
-    hint: 'Gulir untuk melihat · ketuk foto untuk memperbesar',
+    hint: 'Ketuk foto untuk memperbesar',
     open: (n: number, total: number) => `Buka foto ${n} dari ${total}`,
     dialog: 'Galeri foto',
     close: 'Tutup galeri',
@@ -72,6 +72,8 @@ export const copy = {
   closing: {
     thanks: 'Terima Kasih',
     seeYou: 'Sampai Jumpa di Hari Bahagia Kami',
+    signature: 'Kami yang berbahagia,',
+    credit: 'Dibuat oleh',
   },
   music: {
     /** Toggle button; on/off is conveyed by aria-pressed. */
@@ -97,6 +99,9 @@ export const copy = {
     offline: 'Koneksi terputus',
     retry: 'Coba Lagi',
     devSample: 'Buka undangan contoh',
+    // Development-only hints (never shown in production builds).
+    devHome: 'Mode development — alamat undangan berbentuk /wedding/<slug>.',
+    devApiDown: 'Pastikan wedding-api berjalan (alamatnya di VITE_API_PROXY_TARGET).',
   },
   errors: {
     network: 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.',

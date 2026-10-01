@@ -29,7 +29,7 @@ function EventShot({ event, fallbackTimeZone }: { event: WeddingEvent; fallbackT
 
   return (
     <article className="flex max-w-[20rem] flex-col items-center">
-      <h3 className="font-script text-[min(14cqw,3.5rem)] leading-tight text-gold">{event.title}</h3>
+      <h3 className="font-script text-[min(14cqw,3.5rem)] leading-tight text-gold-deep">{event.title}</h3>
 
       <div className="mt-6 flex items-center gap-5" aria-hidden="true">
         <span className="h-px w-10 bg-gold/50" />

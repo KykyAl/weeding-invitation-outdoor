@@ -1,4 +1,4 @@
-import { useEffect, useRef, type PointerEvent } from 'react'
+import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import type { ImageAsset } from '@/types'
 import { copy } from '@/locales/id'
 
@@ -13,6 +13,8 @@ interface GalleryLightboxProps {
 export function GalleryLightbox({ images, index, onIndex, onClose }: GalleryLightboxProps) {
   const dialog = useRef<HTMLDialogElement>(null)
   const swipeStart = useRef<number | null>(null)
+  // The photo button that opened the viewer, captured once (StrictMode re-runs effects).
+  const [opener] = useState(() => document.activeElement as HTMLElement | null)
   const image = images[index]
   const go = (delta: number) => onIndex((index + delta + images.length) % images.length)
 
@@ -23,8 +25,12 @@ export function GalleryLightbox({ images, index, onIndex, onClose }: GalleryLigh
     // the viewer during StrictMode's effect re-run. Removing the node closes it.
     if (!el.open) el.showModal()
     document.documentElement.classList.add('is-lightbox')
-    return () => document.documentElement.classList.remove('is-lightbox')
-  }, [])
+    return () => {
+      document.documentElement.classList.remove('is-lightbox')
+      // Return focus to the photo that opened the viewer.
+      opener?.focus({ preventScroll: true })
+    }
+  }, [opener])
 
   const onPointerUp = (e: PointerEvent) => {
     if (swipeStart.current === null) return

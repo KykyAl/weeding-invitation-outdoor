@@ -23,11 +23,11 @@ export function RsvpThanks({ response, onChange }: RsvpThanksProps) {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
       tl.fromTo('[data-ring]', { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: reducedMotion ? 0.01 : 2.2, ease: 'power2.inOut' })
-        .fromTo('[data-mark]', { autoAlpha: 0, scale: 0.6 }, { autoAlpha: 1, scale: 1, duration: 0.9, transformOrigin: '50% 50%' }, '-=1')
+        .fromTo('[data-mark]', { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.9, transformOrigin: '50% 50%' }, '-=1')
         .fromTo(
           '[data-thanks]',
-          { autoAlpha: 0, y: reducedMotion ? 0 : 16, filter: reducedMotion ? 'blur(0px)' : 'blur(6px)' },
-          { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 1.1, stagger: 0.25 },
+          { opacity: 0, y: reducedMotion ? 0 : 16, filter: reducedMotion ? 'blur(0px)' : 'blur(6px)' },
+          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.1, stagger: 0.25 },
           '-=0.5',
         )
       if (reducedMotion) return
@@ -70,7 +70,7 @@ export function RsvpThanks({ response, onChange }: RsvpThanksProps) {
         </g>
       </svg>
 
-      <p data-thanks className="mt-6 font-script text-[min(12cqw,3rem)] leading-tight text-gold">
+      <p data-thanks className="mt-6 font-script text-[min(12cqw,3rem)] leading-tight text-gold-deep">
         {copy.rsvp.thanks(response.name)}
       </p>
       <p data-thanks className="mt-4 font-serif text-lg leading-relaxed text-cocoa-soft italic">

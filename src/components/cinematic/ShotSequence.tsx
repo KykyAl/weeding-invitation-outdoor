@@ -1,5 +1,6 @@
 import { Children, useRef, type ReactNode } from 'react'
-import { useShotSequence } from '@/hooks/useShotSequence'
+import { shotScrollY, useShotSequence } from '@/hooks/useShotSequence'
+import { scrollToY } from '@/utils/scroll'
 
 interface ShotSequenceProps {
   children: ReactNode
@@ -15,7 +16,17 @@ export function ShotSequence({ children, className = '' }: ShotSequenceProps) {
   return (
     <div ref={ref} className={`relative w-full flex-1 ${className}`}>
       {shots.map((shot, i) => (
-        <div key={i} data-shot className="absolute inset-0 flex flex-col items-center justify-center">
+        <div
+          key={i}
+          data-shot
+          // Focusing something inside a shot (keyboard, screen reader) scrolls that shot into view.
+          onFocus={(e) => {
+            e.stopPropagation()
+            const section = e.currentTarget.closest<HTMLElement>('[data-scene]')
+            if (section) scrollToY(shotScrollY(section, i, shots.length))
+          }}
+          className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center data-[active]:pointer-events-auto"
+        >
           {shot}
         </div>
       ))}

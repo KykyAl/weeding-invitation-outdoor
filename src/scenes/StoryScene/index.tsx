@@ -26,7 +26,7 @@ export function StoryScene({ wedding }: SceneProps) {
                 />
               </div>
             )}
-            <p className="font-serif text-[min(24cqw,6.5rem)] leading-none font-light text-gold/90">{chapter.period}</p>
+            <p className="font-serif text-[min(24cqw,6.5rem)] leading-none font-light text-gold-deep">{chapter.period}</p>
             <h3 className="eyebrow mt-5 text-cocoa">{chapter.title}</h3>
             {chapter.description && (
               <p className="mt-4 font-serif text-[clamp(0.95rem,4.2cqw,1.1rem)] leading-relaxed text-cocoa-soft italic">

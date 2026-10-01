@@ -12,7 +12,7 @@ export function MusicToggle({ playing, onToggle }: MusicToggleProps) {
       type="button"
       onClick={onToggle}
       aria-pressed={playing}
-      aria-label={playing ? copy.music.off : copy.music.on}
+      aria-label={copy.music.label}
       className="fixed right-[max(1rem,calc((100vw-var(--stage-width))/2+1rem))] bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 flex h-11 w-11 items-center justify-center rounded-full border border-gold/50 bg-ivory/70 text-cocoa shadow-[0_6px_24px_-12px_rgba(74,58,46,0.45)] backdrop-blur-md transition-colors duration-500 hover:bg-ivory"
     >
       <span className="flex h-3.5 items-end gap-[3px]" aria-hidden="true">

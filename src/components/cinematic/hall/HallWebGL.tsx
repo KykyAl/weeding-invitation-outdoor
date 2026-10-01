@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useRef, type RefObject } from 'react'
-import { useFrame } from '@react-three/fiber'
-import { useTexture } from '@react-three/drei'
-import { DoubleSide, SRGBColorSpace, type Mesh, type MeshBasicMaterial, type Texture } from 'three'
+import { useEffect, useMemo, useRef, useState, type RefObject } from 'react'
+import { useFrame, useThree } from '@react-three/fiber'
+import { DoubleSide, SRGBColorSpace, Texture, type Mesh, type MeshBasicMaterial, type WebGLRenderer } from 'three'
 import { computeCamera, type CameraPose, type DirectorState } from '../director'
 import type { CoupleLook } from './art/couple'
 import { getArtUrl } from './art/layers'
@@ -14,11 +13,30 @@ interface HallWebGLProps {
   onReady?: () => void
 }
 
-const prepareTexture = (tex: Texture | Texture[]) => {
-  for (const t of Array.isArray(tex) ? tex : [tex]) {
-    t.colorSpace = SRGBColorSpace
-    t.anisotropy = 1
+const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+
+/**
+ * Uploads one texture per frame. Uploading an SVG rasterises it synchronously,
+ * so doing all layers at once would freeze the page for seconds on a phone.
+ * Mirrored layers share a texture.
+ */
+async function loadTextures(urls: string[], gl: WebGLRenderer, isCancelled: () => boolean) {
+  const byUrl = new Map<string, Texture>()
+  for (const url of new Set(urls)) {
+    const img = new Image()
+    img.decoding = 'async'
+    img.src = url
+    await img.decode()
+    if (isCancelled()) break
+    const texture = new Texture(img)
+    texture.colorSpace = SRGBColorSpace
+    texture.anisotropy = 1
+    texture.needsUpdate = true
+    gl.initTexture(texture)
+    byUrl.set(url, texture)
+    await nextFrame()
   }
+  return byUrl
 }
 
 /** The illustrated hall as depth-sorted textured planes (no lights, unlit materials). */
@@ -27,20 +45,35 @@ export function HallWebGL({ director, reducedMotion, look, onReady }: HallWebGLP
     const q = textureQuality()
     return HALL_LAYERS.map((l) => getArtUrl(l.art, q, look))
   }, [look])
-  const textures = useTexture(urls, prepareTexture)
+  const gl = useThree((s) => s.gl)
+  const [textures, setTextures] = useState<Texture[] | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    let loaded: Map<string, Texture> | undefined
+    loadTextures(urls, gl, () => cancelled).then((byUrl) => {
+      loaded = byUrl
+      if (cancelled) byUrl.forEach((t) => t.dispose())
+      else setTextures(urls.map((u) => byUrl.get(u)!))
+    })
+    return () => {
+      cancelled = true
+      loaded?.forEach((t) => t.dispose())
+    }
+  }, [urls, gl])
 
   const meshes = useRef<(Mesh | null)[]>([])
   const resolved = useMemo(() => createResolved(), [])
   const pose = useMemo<CameraPose>(() => ({ x: 0, y: 0, z: 0 }), [])
 
   useEffect(() => {
-    if (!onReady) return
+    if (!onReady || !textures) return
     // Two frames: one to upload textures, one to present the first full frame.
     let id = requestAnimationFrame(() => {
       id = requestAnimationFrame(onReady)
     })
     return () => cancelAnimationFrame(id)
-  }, [onReady])
+  }, [onReady, textures])
 
   useFrame(({ camera, size }) => {
     const s = director.current
@@ -62,6 +95,8 @@ export function HallWebGL({ director, reducedMotion, look, onReady }: HallWebGLP
       ;(mesh.material as MeshBasicMaterial).opacity = r.opacity
     }
   })
+
+  if (!textures) return null
 
   return (
     <>

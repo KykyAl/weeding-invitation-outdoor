@@ -21,7 +21,7 @@ export function WeddingHallScene({ wedding }: SceneProps) {
             “{quote.text}”
           </blockquote>
           {quote.source && (
-            <figcaption data-reveal className="eyebrow mt-4 text-[0.5625rem]">
+            <figcaption data-reveal className="eyebrow mt-4 text-[0.6875rem]">
               {quote.source}
             </figcaption>
           )}

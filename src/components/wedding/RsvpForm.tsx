@@ -18,7 +18,7 @@ interface RsvpFormProps {
 
 const fieldClass =
   'mt-2 w-full border-0 border-b border-gold/40 bg-transparent px-0 py-2 text-base text-cocoa placeholder:text-cocoa-soft/50 ' +
-  'transition-colors focus:border-gold focus:ring-0 focus:outline-none aria-[invalid=true]:border-[#b0645a]'
+  'transition-[border-color,box-shadow] focus:border-cocoa focus:shadow-[0_1px_0_0_var(--color-cocoa)] focus:outline-none aria-[invalid=true]:border-[#9a5249]'
 
 /** Nama · Kehadiran · Jumlah Tamu · Ucapan — minimal, underlined, invitation-like. */
 export function RsvpForm({ defaultName = '', defaults, maxGuests, submitting, error, serverErrors, onSubmit }: RsvpFormProps) {

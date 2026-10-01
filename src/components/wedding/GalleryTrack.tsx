@@ -3,6 +3,7 @@ import type { ImageAsset } from '@/types'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { copy } from '@/locales/id'
 import { gsap } from '@/utils/gsap'
+import { pageTop, scrollToY } from '@/utils/scroll'
 
 interface GalleryTrackProps {
   images: ImageAsset[]
@@ -23,6 +24,18 @@ export function GalleryTrack({ images, onOpen }: GalleryTrackProps) {
   const track = useRef<HTMLUListElement>(null)
   const counter = useRef<HTMLSpanElement>(null)
   const reducedMotion = useReducedMotion()
+
+  /** Keyboard / screen-reader focus on a photo scrolls the strip until it is centred. */
+  const revealItem = (item: HTMLElement) => {
+    const vp = viewport.current
+    const list = track.current
+    const section = vp?.closest<HTMLElement>('[data-scene]')
+    if (!vp || !list || !section) return
+    const distance = Math.max(1, list.scrollWidth - vp.clientWidth)
+    const x = Math.min(distance, Math.max(0, item.offsetLeft + item.offsetWidth / 2 - vp.clientWidth / 2))
+    const range = section.offsetHeight - window.innerHeight * 1.55
+    scrollToY(pageTop(section) + (x / distance) * range)
+  }
 
   useLayoutEffect(() => {
     const vp = viewport.current
@@ -52,12 +65,14 @@ export function GalleryTrack({ images, onOpen }: GalleryTrackProps) {
 
       gsap.utils.toArray<HTMLElement>('[data-item]', list).forEach((item) => {
         const media = item.querySelector('img')
+        // Fade only the photo frame: captions stay at full contrast.
+        const frame = item.querySelector('button')
         const depth = Number(item.dataset.depth)
         const tl = gsap.timeline({
           defaults: { ease: 'none' },
           scrollTrigger: { trigger: item, containerAnimation: slide, start: 'left right', end: 'right left', scrub: true },
         })
-        tl.fromTo(item, { opacity: 0.6 }, { opacity: 1, duration: 0.5 }, 0).to(item, { opacity: 0.6, duration: 0.5 }, 0.5)
+        tl.fromTo(frame, { opacity: 0.6 }, { opacity: 1, duration: 0.5 }, 0).to(frame, { opacity: 0.6, duration: 0.5 }, 0.5)
         if (!reducedMotion) {
           // Nearer frames travel further, so overlapping photos slide past each other.
           tl.fromTo(item, { y: 24 * depth, xPercent: (depth - 0.9) * 60 }, { y: -24 * depth, xPercent: -(depth - 0.9) * 60, duration: 1 }, 0)
@@ -81,6 +96,10 @@ export function GalleryTrack({ images, onOpen }: GalleryTrackProps) {
               key={image.url}
               data-item
               data-depth={depth}
+              onFocus={(e) => {
+                e.stopPropagation()
+                revealItem(e.currentTarget)
+              }}
               className="relative shrink-0"
               style={{
                 width: `${(landscape ? 76 : 62) * depth}cqw`,

@@ -16,6 +16,10 @@ const DEFAULT_REVEAL: [string, string] = ['top 5%', 'top -40%']
  * - intro: `[data-reveal]` children fade/rise in sequence (on scroll, or on a
  *   timer when `play` is used);
  * - outro (pinned scenes): the whole shot fades out before the next scene.
+ *
+ * Only `opacity` is animated (never `visibility`), so faded content stays in the
+ * accessibility tree and can still receive focus — `SceneSection` scrolls it
+ * back into view when that happens.
  */
 export function useSceneTimeline(
   section: RefObject<HTMLElement | null>,
@@ -32,8 +36,8 @@ export function useSceneTimeline(
 
     const ctx = gsap.context(() => {
       const items = gsap.utils.toArray<HTMLElement>('[data-reveal]', el)
-      const hidden = { autoAlpha: 0, y: reducedMotion ? 0 : 26, filter: reducedMotion ? 'blur(0px)' : 'blur(8px)' }
-      const shown = { autoAlpha: 1, y: 0, filter: 'blur(0px)', ease: 'power2.out' }
+      const hidden = { opacity: 0, y: reducedMotion ? 0 : 26, filter: reducedMotion ? 'blur(0px)' : 'blur(8px)' }
+      const shown = { opacity: 1, y: 0, filter: 'blur(0px)', ease: 'power2.out' }
 
       if (items.length) {
         if (play !== undefined) {
@@ -64,9 +68,9 @@ export function useSceneTimeline(
       if (pin) {
         gsap.fromTo(
           inner,
-          { autoAlpha: 1, y: 0 },
+          { opacity: 1, y: 0 },
           {
-            autoAlpha: 0,
+            opacity: 0,
             y: reducedMotion ? 0 : -36,
             ease: 'power1.in',
             immediateRender: false,

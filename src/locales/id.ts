@@ -74,9 +74,10 @@ export const copy = {
     seeYou: 'Sampai Jumpa di Hari Bahagia Kami',
   },
   music: {
-    on: 'Nyalakan musik',
-    off: 'Matikan musik',
+    /** Toggle button; on/off is conveyed by aria-pressed. */
+    label: 'Musik latar',
   },
+  skipToRsvp: 'Langsung ke Konfirmasi Kehadiran',
   scenes: {
     opening: 'Pembuka',
     hall: 'Ruang pernikahan',

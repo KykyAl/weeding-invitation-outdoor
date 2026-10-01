@@ -22,7 +22,7 @@ export function RSVPScene({ wedding, guestName }: SceneProps) {
   // Crossfade between the form and the confirmation.
   useLayoutEffect(() => {
     if (!panel.current) return
-    const tween = gsap.fromTo(panel.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.8, ease: 'power2.out' })
+    const tween = gsap.fromTo(panel.current, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'power2.out' })
     return () => {
       tween.kill()
     }
@@ -38,7 +38,7 @@ export function RSVPScene({ wedding, guestName }: SceneProps) {
         {copy.rsvp.intro}
       </p>
       {settings?.deadline && !closed && view === 'form' && (
-        <p data-reveal className="eyebrow mt-3 text-[0.5625rem]">
+        <p data-reveal className="eyebrow mt-3 text-[0.6875rem]">
           {copy.rsvp.deadline(formatDate(settings.deadline, wedding.timeZone))}
         </p>
       )}

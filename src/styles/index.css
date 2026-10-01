@@ -9,10 +9,12 @@
   --color-sage: #9fae94;
   --color-sage-deep: #5f7259;
   --color-forest: #34453a;
-  --color-gold: #b8975a;
+  --color-gold: #b8975a; /* lines, borders, ornaments */
+  /* Gold for large text: ≥3:1 on every background in the palette (WCAG AA). */
+  --color-gold-deep: #8c6d3a;
   --color-gold-soft: #d8c295;
   --color-cocoa: #4a3a2e;
-  --color-cocoa-soft: #7a6757;
+  --color-cocoa-soft: #6b5949; /* ≥4.5:1 on linen/cream/ivory */
 
   --font-serif: 'Cormorant Garamond', 'Times New Roman', serif;
   --font-sans: 'Jost', system-ui, sans-serif;
@@ -59,9 +61,10 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* Clearly visible on every light background (8.8:1), following rounded shapes. */
   :focus-visible {
-    outline: 1px solid var(--color-gold);
-    outline-offset: 4px;
+    outline: 2px solid var(--color-cocoa);
+    outline-offset: 3px;
   }
 
   ::selection {

@@ -1,6 +1,7 @@
 import { useRef, type ReactNode } from 'react'
 import type { SceneId } from '@/scenes/timeline'
 import { useSceneTimeline } from '@/hooks/useSceneTimeline'
+import { pinnedHoldY, scrollToY } from '@/utils/scroll'
 
 interface SceneSectionProps {
   id: SceneId
@@ -43,6 +44,15 @@ export function SceneSection({
       data-scene={id}
       style={{ minHeight: `${length * 100}dvh` }}
       className="relative"
+      // A pinned scene's content may be faded out; bring the scene on screen when focus lands in it.
+      onFocus={
+        pin
+          ? (e) => {
+              const hold = pinnedHoldY(e.currentTarget)
+              if (Math.abs(window.scrollY - hold) > window.innerHeight * 0.25) scrollToY(hold)
+            }
+          : undefined
+      }
     >
       <div
         ref={contentRef}

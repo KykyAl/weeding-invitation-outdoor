@@ -31,7 +31,7 @@ export function CoupleScene({ wedding }: SceneProps) {
           }`}
         >
           {first.fullName}
-          <span className="my-1 block font-script text-[0.75em] leading-none text-gold">&amp;</span>
+          <span className="my-1 block font-script text-[0.75em] leading-none text-gold-deep">&amp;</span>
           {second.fullName}
         </h2>
       </div>

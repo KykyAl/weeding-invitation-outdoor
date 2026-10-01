@@ -24,9 +24,10 @@ export function InvitationCover({ wedding, guestName, reducedMotion, onOpen }: I
     const ctx = gsap.context(() => {
       gsap.fromTo(
         '[data-cover-item]',
-        { autoAlpha: 0, y: reducedMotion ? 0 : 16 },
+        // Opacity only: the button must stay focusable (autoFocus) while it fades in.
+        { opacity: 0, y: reducedMotion ? 0 : 16 },
         {
-          autoAlpha: 1,
+          opacity: 1,
           y: 0,
           duration: reducedMotion ? 0.3 : 1.6,
           stagger: reducedMotion ? 0 : 0.25,
@@ -38,7 +39,10 @@ export function InvitationCover({ wedding, guestName, reducedMotion, onOpen }: I
     return () => ctx.revert()
   }, [reducedMotion])
 
+  const opening = useRef(false)
   const handleOpen = () => {
+    if (opening.current) return
+    opening.current = true
     gsap.to(ref.current, {
       autoAlpha: 0,
       scale: reducedMotion ? 1 : 1.04,
@@ -58,7 +62,7 @@ export function InvitationCover({ wedding, guestName, reducedMotion, onOpen }: I
     >
       <p data-cover-item className="eyebrow">{copy.cover.eyebrow}</p>
       <h1 id="cover-title" data-cover-item className="display-names mt-5 text-5xl">
-        {first.nickname} <span className="font-script text-gold">&amp;</span> {second.nickname}
+        {first.nickname} <span className="font-script text-gold-deep">&amp;</span> {second.nickname}
       </h1>
       <span data-cover-item className="hairline mt-10 block" aria-hidden="true" />
       <p data-cover-item className="eyebrow mt-8">{copy.cover.dear}</p>

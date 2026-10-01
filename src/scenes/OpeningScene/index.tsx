@@ -13,9 +13,13 @@ export function OpeningScene({ wedding, active = false }: SceneProps) {
   return (
     <SceneSection id="opening" label={copy.scenes.opening} pin length={1.8} play={active}>
       <p data-reveal className="eyebrow">{copy.opening.eyebrow}</p>
-      <h1 data-reveal className="display-names mt-7 text-[min(15cqw,4.25rem)] break-words">
+      <h1
+        id="opening-title"
+        tabIndex={-1}
+        data-reveal
+        className="display-names mt-7 outline-none text-[min(15cqw,4.25rem)] break-words">
         {first.nickname}
-        <span className="my-3 block font-script text-[0.6em] leading-none text-gold">&amp;</span>
+        <span className="my-3 block font-script text-[0.6em] leading-none text-gold-deep">&amp;</span>
         {second.nickname}
       </h1>
       <div data-reveal className="mt-10 flex flex-col items-center">
@@ -28,7 +32,7 @@ export function OpeningScene({ wedding, active = false }: SceneProps) {
         aria-hidden="true"
         className="absolute bottom-[max(2.25rem,env(safe-area-inset-bottom))] left-1/2 flex -translate-x-1/2 flex-col items-center gap-3"
       >
-        <span className="eyebrow text-[0.5625rem]">{copy.opening.scroll}</span>
+        <span className="eyebrow text-[0.6875rem]">{copy.opening.scroll}</span>
         <span className="scroll-cue" />
       </div>
     </SceneSection>

@@ -16,7 +16,7 @@ export function GalleryScene({ wedding }: SceneProps) {
       <h2 data-reveal className="eyebrow">{copy.gallery.heading}</h2>
       <span data-reveal className="hairline mt-4" aria-hidden="true" />
       <GalleryTrack images={gallery} onOpen={setOpenIndex} />
-      <p data-reveal className="eyebrow mt-5 text-[0.5625rem] normal-case tracking-[0.2em]">
+      <p data-reveal className="eyebrow mt-5 text-[0.6875rem] normal-case tracking-[0.2em]">
         {copy.gallery.hint}
       </p>
       {openIndex !== null && (

@@ -9,7 +9,7 @@ export function ClosingScene({ wedding }: SceneProps) {
 
   return (
     <SceneSection id="closing" label={copy.scenes.closing}>
-      <p data-reveal className="font-script text-5xl text-gold">{copy.closing.thanks}</p>
+      <h2 data-reveal className="font-script text-5xl text-gold-deep">{copy.closing.thanks}</h2>
       <p data-reveal className="eyebrow mt-6">{copy.closing.seeYou}</p>
       <p data-reveal className="display-names mt-6 text-3xl">
         {first.nickname} &amp; {second.nickname}

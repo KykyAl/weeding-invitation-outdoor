@@ -39,11 +39,12 @@ describe('GET /api/v1/weddings/:slug', () => {
     const w = res.body.data
     expect(w).toMatchObject({
       slug: SEED_SLUG,
-      groom: { name: 'Mempelai Pria', fullName: 'Nama Lengkap Mempelai Pria' },
-      bride: { name: 'Mempelai Wanita' },
+      groom: { name: 'Mempelai Pria', fullName: 'Nama Lengkap Mempelai Pria', appearance: { skinTone: 'langsat' } },
+      bride: { name: 'Mempelai Wanita', appearance: { hijab: true, skinTone: 'langsat' } },
       weddingDate: '2026-11-11',
       venue: { name: 'Gedung Pernikahan' },
       music: null,
+      couplePhoto: null,
     })
     expect(w.events.map((e: { title: string }) => e.title)).toEqual(['Akad Nikah', 'Resepsi'])
     expect(w.events[0]).toMatchObject({ date: '2026-11-11', startTime: '08:00', endTime: '10:00' })
@@ -126,13 +127,27 @@ describe('admin API', () => {
       .set(auth)
       .send({ slug: 'another-wedding', groomName: 'Groom', brideName: 'Bride', weddingDate: '2027-01-01' })
     expect(created.status).toBe(201)
+    // Appearance defaults: no hijab, kuning langsat.
+    expect(created.body.data.bride.appearance).toEqual({ hijab: false, skinTone: 'langsat' })
     const id = created.body.data.id
+
+    const badTone = await request(app)
+      .post('/api/v1/admin/weddings')
+      .set(auth)
+      .send({ slug: 'bad-tone', groomName: 'G', brideName: 'B', weddingDate: '2027-01-01', brideSkinTone: 'hijau' })
+    expect(badTone.status).toBe(422)
 
     const duplicate = await request(app)
       .post('/api/v1/admin/weddings')
       .set(auth)
       .send({ slug: 'another-wedding', groomName: 'G', brideName: 'B', weddingDate: '2027-01-01' })
     expect(duplicate.status).toBe(409)
+
+    const withPhoto = await request(app)
+      .put(`/api/v1/admin/weddings/${id}`)
+      .set(auth)
+      .send({ slug: 'another-wedding', groomName: 'Groom', brideName: 'Bride', weddingDate: '2027-01-01', couplePhotoUrl: 'https://cdn.example.com/couple.png' })
+    expect(withPhoto.body.data.couplePhoto).toEqual({ url: 'https://cdn.example.com/couple.png' })
 
     const event = await request(app)
       .post(`/api/v1/admin/weddings/${id}/events`)

@@ -112,6 +112,17 @@ dev dependencies are installed, or apply the SQL files with `psql -f`.
 | POST | `/api/v1/admin/weddings/:id/gallery` | Bearer | add photo (URL only) |
 | PUT / DELETE | `/api/v1/admin/gallery/:galleryId` | Bearer | update / delete photo |
 
+**Illustrated couple.** On weddings, `brideHijab` (boolean, default `false`),
+`groomSkinTone` and `brideSkinTone` set how the couple is drawn. Skin tones are
+`light` | `langsat` (kuning langsat, the default) | `medium` | `tan` | `deep`.
+
+**Couple photo.** `couplePhotoUrl` (optional, http(s)) is a cut-out photo of
+the couple: a transparent PNG/WebP with the background removed, full body, feet
+at the bottom edge. When it is set, the invitation shows the photo on the stage
+instead of the illustration, sized to its proportions. If the photo is hosted
+on another domain, that host must allow CORS for the WebGL renderer, otherwise
+the CSS renderer is used. The public API returns it as `couplePhoto: { url }`.
+
 `PUT` replaces the whole record: send every field you want to keep, and omitted
 optional fields become `null`. URLs must be `http(s)`. Dates use `YYYY-MM-DD`
 and times use `HH:MM`.
@@ -178,8 +189,8 @@ curl http://localhost:8080/api/v1/weddings/example-wedding
   "data": {
     "id": "07b43587-…",
     "slug": "example-wedding",
-    "groom": { "name": "Mempelai Pria", "fullName": "Nama Lengkap Mempelai Pria" },
-    "bride": { "name": "Mempelai Wanita", "fullName": "Nama Lengkap Mempelai Wanita" },
+    "groom": { "name": "Mempelai Pria", "fullName": "Nama Lengkap Mempelai Pria", "appearance": { "skinTone": "langsat" } },
+    "bride": { "name": "Mempelai Wanita", "fullName": "Nama Lengkap Mempelai Wanita", "appearance": { "hijab": true, "skinTone": "langsat" } },
     "weddingDate": "2026-11-11",
     "quote": { "text": "Dan di antara tanda-tanda kebesaran-Nya…", "source": "QS. Ar-Rum: 21" },
     "venue": { "name": "Gedung Pernikahan", "address": "Jl. Contoh No. 1, Kota Contoh", "mapsUrl": "https://maps.google.com/?q=Gedung+Pernikahan" },
@@ -238,7 +249,7 @@ src/
   schemas/                 Zod schemas + validate()
   types/wedding.ts         DB rows and API shapes
   app.ts / server.ts       Express app / HTTP server with graceful shutdown
-migrations/                001–006 SQL files
+migrations/                001–008 SQL files
 scripts/                   migrate.ts, seed.ts
 tests/                     Vitest + supertest
 ```

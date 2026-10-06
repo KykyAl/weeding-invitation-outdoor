@@ -5,7 +5,7 @@ import type { Wedding } from '@/types'
 export function getCoupleLook(wedding: Wedding): CoupleLook {
   return {
     hijab: wedding.bride.appearance?.hijab ?? false,
-    groomSkin: wedding.groom.appearance?.skinTone ?? 'medium',
-    brideSkin: wedding.bride.appearance?.skinTone ?? 'medium',
+    groomSkin: wedding.groom.appearance?.skinTone ?? 'langsat',
+    brideSkin: wedding.bride.appearance?.skinTone ?? 'langsat',
   }
 }

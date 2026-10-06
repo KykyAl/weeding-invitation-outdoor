@@ -36,6 +36,13 @@ One command builds, migrates and (re)starts everything as a systemd user service
 `./deploy/deploy.sh`. Operations, admin, backups and moving to a VPS with a domain
 and HTTPS are covered in [deploy/README.md](deploy/README.md).
 
+## Example couple photo
+
+`public/couple/contoh-pasangan.webp` is a demo cut-out (transparent WebP, ~100 kB)
+made from the free [Pexels photo 14348461](https://www.pexels.com/photo/14348461/)
+(Pexels license) by removing the background. It is only an example: replace it
+with the real couple's photo through `couplePhotoUrl` (see wedding-api/README.md).
+
 ## Structure
 
 ```

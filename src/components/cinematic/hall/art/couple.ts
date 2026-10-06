@@ -12,12 +12,18 @@ export interface CoupleLook {
   hijab: boolean
   groomSkin: SkinTone
   brideSkin: SkinTone
+  /** Cut-out photo shown instead of the illustration (aspect = width / height). */
+  photo?: { url: string; aspect: number }
+  /** A photo is set but its size isn't known yet: keep the couple hidden. */
+  pending?: boolean
 }
 
-export const DEFAULT_LOOK: CoupleLook = { hijab: false, groomSkin: 'medium', brideSkin: 'medium' }
+export const DEFAULT_LOOK: CoupleLook = { hijab: false, groomSkin: 'langsat', brideSkin: 'langsat' }
 
 const SKIN: Record<SkinTone, [base: string, shade: string]> = {
   light: ['#f1d6c1', '#dfbca2'],
+  // Kuning langsat: fair, warm and slightly golden rather than pink.
+  langsat: ['#f2d6b3', '#dcb98f'],
   medium: ['#e3bb98', '#cc9d7a'],
   tan: ['#c9976f', '#ae7d58'],
   deep: ['#9a6a4c', '#7c5238'],

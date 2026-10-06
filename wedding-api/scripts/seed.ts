@@ -21,8 +21,9 @@ export async function seed(log = console.log) {
 
     const { rows } = await client.query<{ id: string }>(
       `INSERT INTO weddings (slug, groom_name, groom_full_name, bride_name, bride_full_name, wedding_date,
-         quote, quote_source, venue_name, venue_address, venue_maps_url, music_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+         quote, quote_source, venue_name, venue_address, venue_maps_url, music_url,
+         bride_hijab, groom_skin_tone, bride_skin_tone, couple_photo_url)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
        RETURNING id`,
       [
         SEED_SLUG,
@@ -37,6 +38,10 @@ export async function seed(log = console.log) {
         'Jl. Contoh No. 1, Kota Contoh',
         'https://maps.google.com/?q=Gedung+Pernikahan',
         null,
+        true, // bride wears a hijab
+        'langsat',
+        'langsat',
+        null, // no couple photo: the illustrated couple is shown
       ],
     )
     const weddingId = rows[0].id

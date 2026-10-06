@@ -25,6 +25,8 @@ async function loadTextures(urls: string[], gl: WebGLRenderer, isCancelled: () =
   for (const url of new Set(urls)) {
     const img = new Image()
     img.decoding = 'async'
+    // Photos from another domain need CORS to be usable as WebGL textures.
+    if (/^https?:/i.test(url)) img.crossOrigin = 'anonymous'
     img.src = url
     await img.decode()
     if (isCancelled()) break
@@ -51,11 +53,14 @@ export function HallWebGL({ director, reducedMotion, look, onReady }: HallWebGLP
   useEffect(() => {
     let cancelled = false
     let loaded: Map<string, Texture> | undefined
-    loadTextures(urls, gl, () => cancelled).then((byUrl) => {
-      loaded = byUrl
-      if (cancelled) byUrl.forEach((t) => t.dispose())
-      else setTextures(urls.map((u) => byUrl.get(u)!))
-    })
+    loadTextures(urls, gl, () => cancelled)
+      .then((byUrl) => {
+        loaded = byUrl
+        if (cancelled) byUrl.forEach((t) => t.dispose())
+        else setTextures(urls.map((u) => byUrl.get(u)!))
+      })
+      // e.g. a photo host without CORS: the CSS renderer simply stays on screen.
+      .catch((err) => import.meta.env.DEV && console.warn('[hall] WebGL textures unavailable:', err))
     return () => {
       cancelled = true
       loaded?.forEach((t) => t.dispose())
@@ -80,7 +85,7 @@ export function HallWebGL({ director, reducedMotion, look, onReady }: HallWebGLP
     if (!s) return
     computeCamera(s, reducedMotion, pose)
     camera.position.set(pose.x, pose.y, pose.z)
-    resolveLayers(s, size.width / size.height, reducedMotion, resolved)
+    resolveLayers(s, size.width / size.height, reducedMotion, resolved, look)
 
     for (let i = 0; i < HALL_LAYERS.length; i++) {
       const mesh = meshes.current[i]
@@ -101,7 +106,7 @@ export function HallWebGL({ director, reducedMotion, look, onReady }: HallWebGLP
   return (
     <>
       {HALL_LAYERS.map((layer, i) => {
-        const { w, h } = layerSize(layer)
+        const { w, h } = layerSize(layer, look)
         return (
           <mesh
             key={layer.id}

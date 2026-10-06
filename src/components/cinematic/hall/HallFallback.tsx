@@ -49,7 +49,7 @@ export function HallFallback({ director, reducedMotion, look }: HallFallbackProp
 
     // Size each layer as it appears from the hall camera; per-frame changes are transforms only.
     const size = (img: HTMLImageElement, i: number) => {
-      const { w, h } = layerSize(HALL_LAYERS[i])
+      const { w, h } = layerSize(HALL_LAYERS[i], look)
       const ppu = vh / 2 / ((REST_CAMERA[2] - HALL_LAYERS[i].z) * TAN_HALF_FOV)
       img.style.width = `${w * ppu}px`
       img.style.height = `${h * ppu}px`
@@ -65,7 +65,7 @@ export function HallFallback({ director, reducedMotion, look }: HallFallbackProp
       const s = director.current
       if (!s || !vh) return
       computeCamera(s, reducedMotion, pose)
-      resolveLayers(s, vw / vh, reducedMotion, resolved)
+      resolveLayers(s, vw / vh, reducedMotion, resolved, look)
       HALL_LAYERS.forEach((l, i) => {
         const img = imgs.current[i]
         if (!img) return
@@ -98,7 +98,7 @@ export function HallFallback({ director, reducedMotion, look }: HallFallbackProp
       ro.disconnect()
       gsap.ticker.remove(tick)
     }
-  }, [director, reducedMotion])
+  }, [director, reducedMotion, look])
 
   return (
     <div ref={root} aria-hidden="true" className="absolute inset-0 overflow-hidden bg-cream">

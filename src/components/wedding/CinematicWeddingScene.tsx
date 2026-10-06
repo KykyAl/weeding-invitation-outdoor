@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Wedding } from '@/types'
 import { CinematicBackdrop, CinematicStage } from '@/components/cinematic'
 import { MusicToggle } from '@/components/ui'
 import { useBackgroundMusic } from '@/hooks/useBackgroundMusic'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useCinematicDirector } from '@/hooks/useCinematicDirector'
+import { useCoupleLook } from '@/hooks/useCoupleLook'
 import { copy } from '@/locales/id'
-import { getCoupleLook } from '@/utils/appearance'
 import { ScrollTrigger } from '@/utils/gsap'
 import {
   ClosingScene,
@@ -33,7 +33,7 @@ export function CinematicWeddingScene({ wedding, guestName }: CinematicWeddingSc
   const timelineRef = useRef<HTMLElement>(null)
   const director = useCinematicDirector(timelineRef, { enabled: opened, reducedMotion })
   const music = useBackgroundMusic(wedding.music)
-  const look = useMemo(() => getCoupleLook(wedding), [wedding])
+  const look = useCoupleLook(wedding)
 
   // The cover locks scrolling until the guest opens the invitation.
   useEffect(() => {

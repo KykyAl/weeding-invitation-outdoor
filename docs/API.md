@@ -19,6 +19,7 @@ origin, or leave it empty when the API is served on the same domain. The API's
 | wedding-api | Frontend `Wedding` | Notes |
 |---|---|---|
 | `groom.name` / `groom.fullName` | `groom.nickname` / `groom.fullName` | same for `bride` |
+| `groom.appearance.skinTone`, `bride.appearance.{hijab, skinTone}` | same | illustrated couple; default no hijab, `langsat` |
 | `weddingDate` (`YYYY-MM-DD`) | `date` | read as local noon so no time zone shifts the day |
 | `quote.text` / `quote.source` | `quote` | `null` → no quote |
 | `venue.mapsUrl` | `venue.mapUrl` | |
@@ -28,6 +29,7 @@ origin, or leave it empty when the API is served on the same domain. The API's
 | `stories[].year` | `story[].period` | |
 | `gallery[].imageUrl` / `caption` | `gallery[].url` / `caption` (also the alt text) | unreachable images leave an empty frame |
 | `music.url` | `music.url` | plays only after "Buka Undangan" |
+| `couplePhoto.url` | `couplePhoto.url` | transparent cut-out shown instead of the illustrated couple; illustration if it fails to load |
 
 Invalid items are dropped instead of breaking the page:
 - an event without a date;
@@ -38,7 +40,6 @@ If a name or the date is missing, the page shows "Data undangan belum lengkap".
 
 **Optional extras** that wedding-api does not send yet are accepted if they are
 added later, and default sensibly otherwise:
-- `groom|bride.appearance.{hijab, skinTone}`: default no hijab, `medium`;
 - `timeZone`;
 - `nameOrder`;
 - `rsvp.{enabled, maxGuests, deadline}`: default enabled, 5 guests, no deadline;

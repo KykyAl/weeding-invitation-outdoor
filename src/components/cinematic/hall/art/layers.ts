@@ -22,6 +22,7 @@ export type ArtId =
   | 'veilSpray'
   | 'couple'
   | 'brideVeil'
+  | 'shadow'
 
 interface ArtSpec {
   /** viewBox size (world units × 100). */
@@ -350,6 +351,17 @@ ${place('lc', 150, 118, 9, -55, '#d8c295')}${place('lc', 150, 118, 9, 55, '#d8c2
     draw: () => drawVeil(),
   },
 
+  shadow: {
+    vw: 200,
+    vh: 40,
+    px: 128,
+    seed: 131,
+    draw: () => ({
+      defs: `<radialGradient id="s"><stop offset="0" stop-color="#4a3a2e" stop-opacity=".42"/><stop offset=".6" stop-color="#4a3a2e" stop-opacity=".16"/><stop offset="1" stop-color="#4a3a2e" stop-opacity="0"/></radialGradient>`,
+      body: `<rect width="200" height="40" fill="url(#s)"/>`,
+    }),
+  },
+
   veilSpray: {
     vw: 160,
     vh: 200,
@@ -398,6 +410,8 @@ const LOOK_DEPENDENT = new Set<ArtId>(['couple'])
  * size. The same URL feeds WebGL textures and the HTML/CSS fallback.
  */
 export function getArtUrl(id: ArtId, quality = 1, look: CoupleLook = DEFAULT_LOOK): string {
+  // A real cut-out photo replaces the illustrated couple.
+  if (id === 'couple' && look.photo) return look.photo.url
   const variant = LOOK_DEPENDENT.has(id) ? `:${look.hijab ? 'h' : 'n'}-${look.groomSkin}-${look.brideSkin}` : ''
   const key = `${id}@${quality}${variant}`
   const hit = cache.get(key)

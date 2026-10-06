@@ -19,7 +19,8 @@ export interface ImageAsset {
   height?: number
 }
 
-export type SkinTone = 'light' | 'medium' | 'tan' | 'deep'
+/** `langsat` = kuning langsat: light with a warm yellow undertone. */
+export type SkinTone = 'light' | 'langsat' | 'medium' | 'tan' | 'deep'
 
 /** How the person is drawn in the illustrated scenes. */
 export interface PersonAppearance {
@@ -113,6 +114,8 @@ export interface Wedding {
   events: WeddingEvent[]
   gallery: ImageAsset[]
   music?: Music
+  /** Cut-out photo (transparent PNG/WebP) shown instead of the illustrated couple. */
+  couplePhoto?: ImageAsset
   rsvp?: RsvpSettings
   /** Order of names in the headline. Defaults to groom first. */
   nameOrder?: 'groom-first' | 'bride-first'

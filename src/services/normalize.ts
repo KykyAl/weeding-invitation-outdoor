@@ -84,7 +84,7 @@ const oneOf = <T extends string>(v: unknown, allowed: readonly T[]): T | undefin
 const list = <T>(v: unknown, parse: (item: Raw, index: number) => T | undefined): T[] =>
   Array.isArray(v) ? v.flatMap((item, i) => (isObj(item) ? (parse(item, i) ?? []) : [])) : []
 
-const SKIN_TONES: readonly SkinTone[] = ['light', 'medium', 'tan', 'deep']
+const SKIN_TONES: readonly SkinTone[] = ['light', 'langsat', 'medium', 'tan', 'deep']
 const EVENT_TYPES: readonly WeddingEventType[] = ['akad', 'reception', 'other']
 
 function image(raw: Raw, fallbackAlt: string): ImageAsset | undefined {
@@ -246,6 +246,7 @@ export function parseWedding(raw: unknown, requestedSlug: string): Wedding {
     events,
     gallery: list(w.gallery, (g, i) => image(g, `Foto ${i + 1}`)),
     music: music(w.music),
+    couplePhoto: isObj(w.couplePhoto) ? image(w.couplePhoto, 'Foto mempelai') : undefined,
     rsvp: rsvpSettings(w.rsvp),
     nameOrder: oneOf(w.nameOrder, ['groom-first', 'bride-first'] as const),
   }

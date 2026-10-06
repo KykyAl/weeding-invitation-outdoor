@@ -28,12 +28,13 @@ export function CinematicBackdrop({ director, reducedMotion, look, started }: Ci
   const handleError = useCallback(() => setWebglReady(false), [])
 
   // Keep the cover snappy: probe the GPU and fetch three.js only after opening, when idle.
+  // (and only once the couple photo's size is known, so textures load once).
   useEffect(() => {
-    if (!started) return
+    if (!started || look.pending) return
     return whenIdle(() => {
       if (chooseHallRenderer(reducedMotion) === 'webgl') setLoadWebGL(true)
     })
-  }, [started, reducedMotion])
+  }, [started, reducedMotion, look.pending])
 
   return (
     <div className="pointer-events-none fixed inset-y-0 left-1/2 z-0 w-[var(--stage-width)] -translate-x-1/2 overflow-hidden bg-cream">

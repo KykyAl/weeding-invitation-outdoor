@@ -1,3 +1,7 @@
+/** Illustrated couple skin tones; `langsat` = kuning langsat. */
+export const SKIN_TONES = ['light', 'langsat', 'medium', 'tan', 'deep'] as const
+export type SkinTone = (typeof SKIN_TONES)[number]
+
 /** Database rows (snake_case, as returned by `pg`). */
 export interface WeddingRow {
   id: string
@@ -13,6 +17,10 @@ export interface WeddingRow {
   venue_address: string | null
   venue_maps_url: string | null
   music_url: string | null
+  bride_hijab: boolean
+  groom_skin_tone: SkinTone
+  bride_skin_tone: SkinTone
+  couple_photo_url: string | null
   created_at: Date
   updated_at: Date
 }
@@ -94,8 +102,8 @@ export interface WeddingPhoto {
 export interface Wedding {
   id: string
   slug: string
-  groom: { name: string; fullName: string | null }
-  bride: { name: string; fullName: string | null }
+  groom: { name: string; fullName: string | null; appearance: { skinTone: SkinTone } }
+  bride: { name: string; fullName: string | null; appearance: { hijab: boolean; skinTone: SkinTone } }
   weddingDate: string
   quote: { text: string; source: string | null } | null
   venue: { name: string | null; address: string | null; mapsUrl: string | null }
@@ -103,4 +111,6 @@ export interface Wedding {
   stories: WeddingStory[]
   gallery: WeddingPhoto[]
   music: { url: string } | null
+  /** Cut-out photo shown on the stage instead of the illustrated couple. */
+  couplePhoto: { url: string } | null
 }

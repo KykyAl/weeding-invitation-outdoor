@@ -88,8 +88,12 @@ export async function loadWedding(where: 'slug' | 'id', value: string): Promise<
   return {
     id: w.id,
     slug: w.slug,
-    groom: { name: w.groom_name, fullName: w.groom_full_name },
-    bride: { name: w.bride_name, fullName: w.bride_full_name },
+    groom: { name: w.groom_name, fullName: w.groom_full_name, appearance: { skinTone: w.groom_skin_tone } },
+    bride: {
+      name: w.bride_name,
+      fullName: w.bride_full_name,
+      appearance: { hijab: w.bride_hijab, skinTone: w.bride_skin_tone },
+    },
     weddingDate: w.wedding_date,
     quote: w.quote ? { text: w.quote, source: w.quote_source } : null,
     venue: { name: w.venue_name, address: w.venue_address, mapsUrl: w.venue_maps_url },
@@ -97,6 +101,7 @@ export async function loadWedding(where: 'slug' | 'id', value: string): Promise<
     stories: stories.rows.map(toStory),
     gallery: gallery.rows.map(toPhoto),
     music: w.music_url ? { url: w.music_url } : null,
+    couplePhoto: w.couple_photo_url ? { url: w.couple_photo_url } : null,
   }
 }
 
@@ -144,6 +149,10 @@ const weddingValues = (w: WeddingInput) => [
   w.venueAddress,
   w.venueMapsUrl,
   w.musicUrl,
+  w.brideHijab,
+  w.groomSkinTone,
+  w.brideSkinTone,
+  w.couplePhotoUrl,
 ]
 
 /** GET /admin/weddings */
@@ -182,22 +191,24 @@ export const createWedding: RequestHandler = async (req, res) => {
   const input = validate(weddingSchema, req.body)
   const { rows } = await pool.query<{ id: string }>(
     `INSERT INTO weddings (slug, groom_name, groom_full_name, bride_name, bride_full_name, wedding_date,
-       quote, quote_source, venue_name, venue_address, venue_maps_url, music_url)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+       quote, quote_source, venue_name, venue_address, venue_maps_url, music_url,
+       bride_hijab, groom_skin_tone, bride_skin_tone, couple_photo_url)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
      RETURNING id`,
     weddingValues(input),
   )
   res.status(201).json({ message: 'Wedding berhasil dibuat', data: await loadWedding('id', rows[0].id) })
 }
 
-/** PUT /admin/weddings/:id — full replace; omitted optional fields become null. */
+/** PUT /admin/weddings/:id — full replace; omitted optional fields become null (appearance: defaults). */
 export const updateWedding: RequestHandler<{ id: string }> = async (req, res) => {
   const id = uuidParam(req.params.id, weddingNotFound)
   const input = validate(weddingSchema, req.body)
   const { rowCount } = await pool.query(
     `UPDATE weddings SET slug = $2, groom_name = $3, groom_full_name = $4, bride_name = $5, bride_full_name = $6,
        wedding_date = $7, quote = $8, quote_source = $9, venue_name = $10, venue_address = $11,
-       venue_maps_url = $12, music_url = $13, updated_at = now()
+       venue_maps_url = $12, music_url = $13, bride_hijab = $14, groom_skin_tone = $15, bride_skin_tone = $16,
+       couple_photo_url = $17, updated_at = now()
      WHERE id = $1`,
     [id, ...weddingValues(input)],
   )

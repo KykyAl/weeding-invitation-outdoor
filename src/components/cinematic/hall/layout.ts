@@ -6,7 +6,7 @@
  */
 import { REST_CAMERA, SCENE_KEYFRAMES, TAN_HALF_FOV } from '@/scenes/timeline'
 import type { DirectorState } from '../director'
-import { VEIL_ANCHOR } from './art/couple'
+import { VEIL_ANCHOR, type CoupleLook } from './art/couple'
 import { ART_SIZE, type ArtId } from './art/layers'
 
 export interface LayerDef {
@@ -35,6 +35,8 @@ export interface LayerDef {
   part?: number
   /** Subtle vertical "breathing" scale around the anchor. */
   breath?: { amp: number; speed: number }
+  /** Only shown when the couple is a photo (e.g. its ground shadow). */
+  photoOnly?: boolean
   opacity?: number
   sway?: { amp: number; speed: number; phase?: number }
   breathe?: { amp: number; speed: number }
@@ -48,6 +50,8 @@ const COUPLE_FEET = -1.95
 const COUPLE_ART = ART_SIZE.couple
 const VEIL_X = (VEIL_ANCHOR.x / 100 - COUPLE_ART.w / 2) * COUPLE_SCALE
 const VEIL_Y = COUPLE_FEET + (COUPLE_ART.h - VEIL_ANCHOR.y / 100) * COUPLE_SCALE
+/** World height of a couple photo (head to feet), matching the illustration's scale. */
+const PHOTO_HEIGHT = 1.72
 
 export const HALL_LAYERS: readonly LayerDef[] = [
   // BACKGROUND
@@ -60,6 +64,7 @@ export const HALL_LAYERS: readonly LayerDef[] = [
   // CHARACTER
   { id: 'couple-glow', art: 'glow', z: -2.1, y: -1, w: 2.4, h: 2.8, role: 'couple', opacity: 0.75, breathe: { amp: 0.2, speed: 0.6 } },
   { id: 'bride-veil', art: 'brideVeil', z: -1.95, x: VEIL_X, y: VEIL_Y, scale: COUPLE_SCALE, anchor: 'top', role: 'couple', sway: { amp: 0.035, speed: 0.7 } },
+  { id: 'couple-shadow', art: 'shadow', z: -1.91, y: COUPLE_FEET + 0.03, w: 1.6, h: 0.3, role: 'couple', photoOnly: true },
   { id: 'couple', art: 'couple', z: -1.9, y: COUPLE_FEET, scale: COUPLE_SCALE, anchor: 'bottom', role: 'couple', breath: { amp: 0.0045, speed: 1.1 } },
   { id: 'pedestal-l', art: 'pedestal', z: -1, y: -2.75, scale: 0.78, anchor: 'bottom', hug: -1, inset: 1.12, part: 0.35 },
   { id: 'pedestal-r', art: 'pedestal', z: -1, y: -2.75, scale: 0.78, anchor: 'bottom', hug: 1, inset: 1.12, mirror: true, part: 0.35 },
@@ -75,10 +80,19 @@ export const HALL_LAYERS: readonly LayerDef[] = [
   { id: 'veil-spray-br', art: 'veilSpray', z: 4.6, y: -1.65, anchor: 'bottom', hug: 1, inset: 1.15, hugCameraZ: OPENING_Z, role: 'veil', mirror: true, flipY: true },
 ]
 
-export const layerSize = (l: LayerDef) => ({
-  w: l.w ?? ART_SIZE[l.art].w * (l.scale ?? 1),
-  h: l.h ?? ART_SIZE[l.art].h * (l.scale ?? 1),
-})
+export const layerSize = (l: LayerDef, look?: CoupleLook) => {
+  if (l.art === 'couple' && look?.photo) return { w: PHOTO_HEIGHT * look.photo.aspect, h: PHOTO_HEIGHT }
+  return {
+    w: l.w ?? ART_SIZE[l.art].w * (l.scale ?? 1),
+    h: l.h ?? ART_SIZE[l.art].h * (l.scale ?? 1),
+  }
+}
+
+/** Layers that are switched off for this look (photo vs illustration, photo still loading). */
+const isHidden = (l: LayerDef, look?: CoupleLook) =>
+  (l.photoOnly && !look?.photo) ||
+  (l.art === 'brideVeil' && !!look?.photo) ||
+  (!!look?.pending && l.role === 'couple')
 
 export interface ResolvedLayer {
   x: number
@@ -94,12 +108,18 @@ export const createResolved = () => HALL_LAYERS.map<ResolvedLayer>(() => ({ x: 0
 /** Half-width of the frame at depth `z` for a camera at distance `camZ`. */
 const halfWidthAt = (z: number, camZ: number, aspect: number) => (camZ - z) * TAN_HALF_FOV * aspect
 
-export function resolveLayers(s: DirectorState, aspect: number, reducedMotion: boolean, out: ResolvedLayer[]) {
+export function resolveLayers(
+  s: DirectorState,
+  aspect: number,
+  reducedMotion: boolean,
+  out: ResolvedLayer[],
+  look?: CoupleLook,
+) {
   const t = s.time
   for (let i = 0; i < HALL_LAYERS.length; i++) {
     const l = HALL_LAYERS[i]
     const r = out[i]
-    const { w, h } = layerSize(l)
+    const { w, h } = layerSize(l, look)
 
     let x = l.x ?? 0
     if (l.hug) {
@@ -147,7 +167,7 @@ export function resolveLayers(s: DirectorState, aspect: number, reducedMotion: b
     r.rot = rot
     r.sx = l.mirror ? -1 : 1
     r.sy = sy
-    r.opacity = Math.min(1, Math.max(0, opacity))
+    r.opacity = isHidden(l, look) ? 0 : Math.min(1, Math.max(0, opacity))
   }
   return out
 }

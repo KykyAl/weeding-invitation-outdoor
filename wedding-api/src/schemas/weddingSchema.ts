@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { AppError } from '../middleware/errorHandler.js'
+import { SKIN_TONES } from '../types/wedding.js'
 import { optionalText } from './validate.js'
 
 const requiredText = (max: number, label: string) =>
@@ -45,6 +46,12 @@ export const weddingSchema = z.object({
   venueAddress: optionalText(2000, 'Alamat venue'),
   venueMapsUrl: optionalUrl('Link maps'),
   musicUrl: optionalUrl('Link musik'),
+  // Illustrated couple (not photos).
+  brideHijab: z.boolean({ error: 'Hijab harus true atau false' }).default(false),
+  groomSkinTone: z.enum(SKIN_TONES, { error: `Warna kulit harus salah satu dari: ${SKIN_TONES.join(', ')}` }).default('langsat'),
+  brideSkinTone: z.enum(SKIN_TONES, { error: `Warna kulit harus salah satu dari: ${SKIN_TONES.join(', ')}` }).default('langsat'),
+  /** Transparent cut-out photo of the couple; replaces the illustration when set. */
+  couplePhotoUrl: optionalUrl('Foto pasangan'),
 })
 
 export const eventSchema = z

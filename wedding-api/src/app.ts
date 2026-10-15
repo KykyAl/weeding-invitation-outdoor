@@ -8,7 +8,7 @@ import { errorHandler } from './middleware/errorHandler.js'
 import { notFound } from './middleware/notFound.js'
 import { adminRoutes } from './routes/adminRoutes.js'
 import { authRoutes } from './routes/authRoutes.js'
-import { publicRoutes } from './routes/publicRoutes.js'
+import { notFoundLimiter, publicRoutes } from './routes/publicRoutes.js'
 
 export const app = express()
 
@@ -39,7 +39,7 @@ app.use('/api/v1', publicRoutes)
 // Optional: serve the built frontend too, with link-preview tags on invitation pages.
 if (env.FRONTEND_DIST) {
   const dist = path.resolve(env.FRONTEND_DIST)
-  app.get('/wedding/:slug', renderInvitationPage)
+  app.get('/wedding/:slug', notFoundLimiter, renderInvitationPage)
   app.use(
     express.static(dist, {
       index: false,

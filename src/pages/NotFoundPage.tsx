@@ -11,7 +11,7 @@ export function NotFoundPage() {
           {copy.status.devHome}{' '}
           <a
             className="underline decoration-gold underline-offset-4"
-            href={USE_SAMPLE_DATA ? '/wedding/sample-wedding?to=Andi' : '/wedding/example-wedding?to=Andi'}
+            href={USE_SAMPLE_DATA ? '/wedding/sample-wedding?to=' : '/wedding/example-wedding?to='}
           >
             {copy.status.devSample}
           </a>

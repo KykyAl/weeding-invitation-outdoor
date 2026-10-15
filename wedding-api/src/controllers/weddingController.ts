@@ -1,14 +1,16 @@
 import type { RequestHandler } from 'express'
 import { pool } from '../db/pool.js'
 import { AppError } from '../middleware/errorHandler.js'
+import { verifiedGuest, withRandomSuffix } from './guestController.js'
 import {
   eventSchema,
   gallerySchema,
   storySchema,
   uuidParam,
   weddingSchema,
+  weddingUpdateSchema,
   type EventInput,
-  type WeddingInput,
+  type WeddingUpdateInput,
 } from '../schemas/weddingSchema.js'
 import { validate } from '../schemas/validate.js'
 import type {
@@ -125,7 +127,9 @@ export const weddingNotFound = () => new AppError(404, 'WEDDING_NOT_FOUND', 'Wed
 export const getPublicWedding: RequestHandler<{ slug: string }> = async (req, res) => {
   const wedding = await loadWedding('slug', req.params.slug)
   if (!wedding) throw weddingNotFound()
-  res.json({ data: wedding })
+  // The guest's name is only returned when the link's signature (&k=) is valid.
+  const guestName = verifiedGuest(req, wedding.slug)
+  res.json({ data: { ...wedding, guest: guestName ? { name: guestName } : null } })
 }
 
 // ---------------------------------------------------------------------------
@@ -136,8 +140,7 @@ const eventNotFound = () => new AppError(404, 'EVENT_NOT_FOUND', 'Event tidak di
 const storyNotFound = () => new AppError(404, 'STORY_NOT_FOUND', 'Story tidak ditemukan')
 const photoNotFound = () => new AppError(404, 'GALLERY_NOT_FOUND', 'Foto tidak ditemukan')
 
-const weddingValues = (w: WeddingInput) => [
-  w.slug,
+const weddingValues = (w: WeddingUpdateInput) => [
   w.groomName,
   w.groomFullName,
   w.brideName,
@@ -195,20 +198,21 @@ export const createWedding: RequestHandler = async (req, res) => {
        bride_hijab, groom_skin_tone, bride_skin_tone, couple_photo_url)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
      RETURNING id`,
-    weddingValues(input),
+    // A random suffix makes the address impossible to guess: arga-nadia → arga-nadia-7k3p9q.
+    [withRandomSuffix(input.slug), ...weddingValues(input)],
   )
   res.status(201).json({ message: 'Wedding berhasil dibuat', data: await loadWedding('id', rows[0].id) })
 }
 
-/** PUT /admin/weddings/:id — full replace; omitted optional fields become null (appearance: defaults). */
+/** PUT /admin/weddings/:id — full replace (slug excluded: it never changes); omitted optional fields become null. */
 export const updateWedding: RequestHandler<{ id: string }> = async (req, res) => {
   const id = uuidParam(req.params.id, weddingNotFound)
-  const input = validate(weddingSchema, req.body)
+  const input = validate(weddingUpdateSchema, req.body)
   const { rowCount } = await pool.query(
-    `UPDATE weddings SET slug = $2, groom_name = $3, groom_full_name = $4, bride_name = $5, bride_full_name = $6,
-       wedding_date = $7, quote = $8, quote_source = $9, venue_name = $10, venue_address = $11,
-       venue_maps_url = $12, music_url = $13, bride_hijab = $14, groom_skin_tone = $15, bride_skin_tone = $16,
-       couple_photo_url = $17, updated_at = now()
+    `UPDATE weddings SET groom_name = $2, groom_full_name = $3, bride_name = $4, bride_full_name = $5,
+       wedding_date = $6, quote = $7, quote_source = $8, venue_name = $9, venue_address = $10,
+       venue_maps_url = $11, music_url = $12, bride_hijab = $13, groom_skin_tone = $14, bride_skin_tone = $15,
+       couple_photo_url = $16, updated_at = now()
      WHERE id = $1`,
     [id, ...weddingValues(input)],
   )

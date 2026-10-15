@@ -31,6 +31,7 @@ PORT=$port
 DATABASE_URL=$db_url
 JWT_SECRET=$(openssl rand -hex 32)
 JWT_EXPIRES_IN=7d
+GUEST_LINK_SECRET=$(openssl rand -hex 32)
 # Origins allowed to call the API from a browser (comma-separated).
 CORS_ORIGIN=${CORS_ORIGIN:-http://${ip:-localhost}:$port,http://localhost:$port}
 # Set to 1 when Nginx (or another proxy) sits in front.
@@ -38,6 +39,11 @@ TRUST_PROXY=${TRUST_PROXY:-0}
 FRONTEND_DIST=$APP_DIR/frontend
 ENV
   chmod 600 "$ENV_FILE"
+fi
+# Settings added in later versions are appended to an existing file.
+if ! grep -q '^GUEST_LINK_SECRET=' "$ENV_FILE"; then
+  step "Adding GUEST_LINK_SECRET to $ENV_FILE"
+  echo "GUEST_LINK_SECRET=$(openssl rand -hex 32)" >> "$ENV_FILE"
 fi
 set -a; source "$ENV_FILE"; set +a
 

@@ -33,7 +33,7 @@ export const weddingSchema = z.object({
     .string({ error: 'Slug wajib diisi' })
     .trim()
     .toLowerCase()
-    .max(100, 'Slug maksimal 100 karakter')
+    .max(90, 'Slug maksimal 90 karakter')
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug hanya boleh huruf kecil, angka, dan tanda hubung'),
   groomName: requiredText(100, 'Nama mempelai pria'),
   groomFullName: optionalText(150, 'Nama lengkap mempelai pria'),
@@ -53,6 +53,9 @@ export const weddingSchema = z.object({
   /** Transparent cut-out photo of the couple; replaces the illustration when set. */
   couplePhotoUrl: optionalUrl('Foto pasangan'),
 })
+
+/** Editing never changes the slug: links already sent must keep working. */
+export const weddingUpdateSchema = weddingSchema.omit({ slug: true })
 
 export const eventSchema = z
   .object({
@@ -92,6 +95,7 @@ export const gallerySchema = z.object({
 })
 
 export type WeddingInput = z.infer<typeof weddingSchema>
+export type WeddingUpdateInput = z.infer<typeof weddingUpdateSchema>
 export type EventInput = z.infer<typeof eventSchema>
 export type StoryInput = z.infer<typeof storySchema>
 export type GalleryInput = z.infer<typeof gallerySchema>

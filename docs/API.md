@@ -38,6 +38,12 @@ Invalid items are dropped instead of breaking the page:
 
 If a name or the date is missing, the page shows "Data undangan belum lengkap".
 
+**Guest name.** The frontend forwards `?to=` and `&k=` from the page URL to
+`GET /weddings/:slug`, and shows the name only from the response's
+`guest.name`, which the server returns only for a valid signature. It never
+reads the name straight from the URL. The cover, the RSVP prefill and the
+WhatsApp preview all use this verified name.
+
 **Optional extras** that wedding-api does not send yet are accepted if they are
 added later, and default sensibly otherwise:
 - `timeZone`;

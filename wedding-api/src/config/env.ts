@@ -9,6 +9,8 @@ const schema = z.object({
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
   JWT_EXPIRES_IN: z.string().default('7d'),
+  /** Signs guest names in invitation links. Required in production (≥ 32 chars). */
+  GUEST_LINK_SECRET: z.string().min(32, 'GUEST_LINK_SECRET must be at least 32 characters').optional(),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
   /** Number of reverse proxies in front of the app (for correct client IPs in rate limiting). */
   TRUST_PROXY: z.coerce.number().int().min(0).default(0),
@@ -19,6 +21,11 @@ const schema = z.object({
 const parsed = schema.safeParse(process.env)
 if (!parsed.success) {
   console.error('Invalid environment variables:', z.flattenError(parsed.error).fieldErrors)
+  process.exit(1)
+}
+
+if (parsed.data.NODE_ENV === 'production' && !parsed.data.GUEST_LINK_SECRET) {
+  console.error('GUEST_LINK_SECRET is required in production (e.g. `openssl rand -hex 32`).')
   process.exit(1)
 }
 

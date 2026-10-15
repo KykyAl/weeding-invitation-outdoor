@@ -15,6 +15,7 @@ import {
   updateStory,
   updateWedding,
 } from '../controllers/weddingController.js'
+import { createGuestLinks } from '../controllers/guestController.js'
 import { requireAdmin } from '../middleware/auth.js'
 
 export const adminRoutes = Router()
@@ -26,6 +27,7 @@ adminRoutes.post('/weddings', createWedding)
 adminRoutes.get('/weddings/:id', getWedding)
 adminRoutes.put('/weddings/:id', updateWedding)
 adminRoutes.delete('/weddings/:id', deleteWedding)
+adminRoutes.post('/weddings/:id/guest-links', createGuestLinks)
 
 adminRoutes.post('/weddings/:id/events', createEvent)
 adminRoutes.put('/events/:eventId', updateEvent)

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import type { Wedding } from '@/types'
 import { InviteButton } from '@/components/ui'
 import { getCouple } from '@/utils/format'
@@ -19,6 +19,9 @@ interface InvitationCoverProps {
 export function InvitationCover({ wedding, guestName, reducedMotion, onOpen }: InvitationCoverProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [first, second] = getCouple(wedding)
+  // The couple's photo greets the guest; hidden if it can't be loaded.
+  const [photoFailed, setPhotoFailed] = useState(false)
+  const photo = photoFailed ? undefined : wedding.couplePhoto
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -60,14 +63,34 @@ export function InvitationCover({ wedding, guestName, reducedMotion, onOpen }: I
       aria-labelledby="cover-title"
       className="fixed inset-y-0 left-1/2 z-50 flex w-[var(--stage-width)] -translate-x-1/2 flex-col items-center justify-center bg-cream/90 px-8 text-center backdrop-blur-sm"
     >
+      {photo && (
+        <div
+          data-cover-item
+          className="mb-6 aspect-[3/4] h-[min(30dvh,17rem)] overflow-hidden rounded-t-full border border-gold/50 p-1.5 shadow-[0_20px_50px_-28px_rgba(74,58,46,0.55)]"
+        >
+          <div className="h-full w-full overflow-hidden rounded-t-full bg-[radial-gradient(ellipse_at_50%_38%,var(--color-ivory),var(--color-linen)_68%,var(--color-beige))]">
+            <img
+              src={photo.url}
+              alt={copy.cover.photoAlt(first.nickname, second.nickname)}
+              decoding="async"
+              onError={() => setPhotoFailed(true)}
+              className="h-full w-full object-contain object-bottom pt-4"
+            />
+          </div>
+        </div>
+      )}
       <p data-cover-item className="eyebrow">{copy.cover.eyebrow}</p>
-      <h1 id="cover-title" data-cover-item className="display-names mt-5 text-5xl">
+      <h1
+        id="cover-title"
+        data-cover-item
+        className={`display-names ${photo ? 'mt-3 text-[min(11cqw,2.75rem)]' : 'mt-5 text-5xl'}`}
+      >
         {first.nickname} <span className="font-script text-gold-deep">&amp;</span> {second.nickname}
       </h1>
-      <span data-cover-item className="hairline mt-10 block" aria-hidden="true" />
-      <p data-cover-item className="eyebrow mt-8">{copy.cover.dear}</p>
+      <span data-cover-item className={`hairline block ${photo ? 'mt-6' : 'mt-10'}`} aria-hidden="true" />
+      <p data-cover-item className={`eyebrow ${photo ? 'mt-5' : 'mt-8'}`}>{copy.cover.dear}</p>
       <p data-cover-item className="mt-2 font-serif text-2xl italic">{guestName ?? copy.cover.guestFallback}</p>
-      <div data-cover-item className="mt-10">
+      <div data-cover-item className={photo ? 'mt-7' : 'mt-10'}>
         <InviteButton onClick={handleOpen} autoFocus>
           {copy.cover.open}
         </InviteButton>

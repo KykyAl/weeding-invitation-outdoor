@@ -54,6 +54,19 @@ set -a; . ~/.config/wedding-invitation/production.env; set +a
 ADMIN_USERNAME=admin ADMIN_PASSWORD='password-baru-minimal-12-karakter' npm run create-admin
 ```
 
+**Link tamu.** Nama tamu harus dibuat lewat skrip ini. Link yang namanya diubah
+sendiri akan menampilkan "Bapak/Ibu/Saudara/i".
+
+```bash
+./deploy/guest-links.sh example-wedding "Andi Pratama" "Keluarga Bpk. Budi"
+```
+
+Argumen pertama adalah slug undangan (bagian setelah `/wedding/` di alamatnya).
+Argumen berikutnya adalah nama-nama tamu: beri tanda kutip kalau nama berisi
+spasi. Skrip ini login sebagai admin dan mencari undangannya sendiri, lalu
+mencetak satu link per tamu yang siap dikirim. Kalau sudah memakai domain,
+tambahkan `BASE_URL=https://undangan.domain-anda.com` di depan perintahnya.
+
 **Backup database** (contoh harian dengan cron):
 
 ```bash

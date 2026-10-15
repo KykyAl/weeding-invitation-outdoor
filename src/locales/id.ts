@@ -11,6 +11,7 @@ export const copy = {
     dear: 'Kepada Yth.',
     guestFallback: 'Bapak/Ibu/Saudara/i',
     open: 'Buka Undangan',
+    photoAlt: (first: string, second: string) => `Foto ${first} dan ${second}`,
   },
   opening: {
     eyebrow: 'Pernikahan',

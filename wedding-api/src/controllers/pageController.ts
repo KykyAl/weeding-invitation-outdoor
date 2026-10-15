@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import type { RequestHandler } from 'express'
 import { env } from '../config/env.js'
+import { verifiedGuest } from './guestController.js'
 import { loadWedding } from './weddingController.js'
 
 /**
@@ -34,6 +35,7 @@ const formatDate = (day: string) =>
 /** GET /wedding/:slug — the invitation page with per-wedding (and per-guest) preview tags. */
 export const renderInvitationPage: RequestHandler<{ slug: string }> = async (req, res) => {
   const html = await template()
+  res.set('X-Robots-Tag', 'noindex, nofollow')
   const wedding = await loadWedding('slug', req.params.slug)
   if (!wedding) {
     // The frontend shows its own "not found" screen.
@@ -42,7 +44,8 @@ export const renderInvitationPage: RequestHandler<{ slug: string }> = async (req
   }
 
   const origin = `${req.protocol}://${req.get('host')}`
-  const guest = typeof req.query.to === 'string' ? req.query.to.replace(/\s+/g, ' ').trim().slice(0, 60) : ''
+  // Only a correctly signed name appears in the preview; edited links fall back to the generic text.
+  const guest = verifiedGuest(req, wedding.slug) ?? ''
   const title = `Pernikahan ${wedding.groom.name} & ${wedding.bride.name}`
   const description = [guest && `Kepada Yth. ${guest}`, formatDate(wedding.weddingDate), wedding.venue.name]
     .filter(Boolean)

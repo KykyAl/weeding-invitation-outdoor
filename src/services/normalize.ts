@@ -247,6 +247,7 @@ export function parseWedding(raw: unknown, requestedSlug: string): Wedding {
     gallery: list(w.gallery, (g, i) => image(g, `Foto ${i + 1}`)),
     music: music(w.music),
     couplePhoto: isObj(w.couplePhoto) ? image(w.couplePhoto, 'Foto mempelai') : undefined,
+    guestName: str(obj(w.guest).name),
     rsvp: rsvpSettings(w.rsvp),
     nameOrder: oneOf(w.nameOrder, ['groom-first', 'bride-first'] as const),
   }

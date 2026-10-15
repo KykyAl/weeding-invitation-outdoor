@@ -1,14 +1,12 @@
 import { useEffect } from 'react'
 import { CinematicWeddingScene } from '@/components/wedding'
 import { InviteButton, StatusScreen } from '@/components/ui'
-import { useGuestName } from '@/hooks/useGuestName'
 import { useWedding } from '@/hooks/useWedding'
 import { copy } from '@/locales/id'
 import { getCouple } from '@/utils/format'
 
 export function WeddingPage({ slug }: { slug: string }) {
   const { state, retry } = useWedding(slug)
-  const guestName = useGuestName()
 
   useEffect(() => {
     if (state.status !== 'ready') return
@@ -32,6 +30,6 @@ export function WeddingPage({ slug }: { slug: string }) {
         </StatusScreen>
       )
     case 'ready':
-      return <CinematicWeddingScene wedding={state.wedding} guestName={guestName} />
+      return <CinematicWeddingScene wedding={state.wedding} guestName={state.wedding.guestName ?? null} />
   }
 }

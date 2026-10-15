@@ -31,6 +31,7 @@ cp .env.example .env   # then edit the values
 | `DATABASE_URL` | `postgresql://wedding:secret@localhost:5432/wedding` | required |
 | `JWT_SECRET` | output of `openssl rand -hex 32` | required; must be at least 32 characters in production |
 | `JWT_EXPIRES_IN` | `7d` | token lifetime (`12h`, `7d`, …) |
+| `GUEST_LINK_SECRET` | output of `openssl rand -hex 32` | signs guest links; required in production. Changing it invalidates links already sent |
 | `CORS_ORIGIN` | `http://localhost:5173` | comma-separated frontend origins; nothing is hardcoded |
 | `TRUST_PROXY` | `0` | set to `1` behind one reverse proxy so rate limits see real IPs |
 | `FRONTEND_DIST` | `../dist` | optional; serve the built frontend + link previews (see below) |
@@ -105,6 +106,7 @@ dev dependencies are installed, or apply the SQL files with `psql -f`.
 | GET | `/api/v1/admin/weddings/:id` | Bearer | wedding + events/stories/gallery + RSVPs |
 | PUT | `/api/v1/admin/weddings/:id` | Bearer | replace wedding fields |
 | DELETE | `/api/v1/admin/weddings/:id` | Bearer | delete (cascades to children and RSVPs) |
+| POST | `/api/v1/admin/weddings/:id/guest-links` | Bearer | signed link per guest (see below) |
 | POST | `/api/v1/admin/weddings/:id/events` | Bearer | add event |
 | PUT / DELETE | `/api/v1/admin/events/:eventId` | Bearer | update / delete event |
 | POST | `/api/v1/admin/weddings/:id/stories` | Bearer | add story |
@@ -147,8 +149,31 @@ One server then serves both the API and the invitation. If the frontend is
 hosted elsewhere instead, route `/wedding/*` to this server through your proxy,
 or previews will show only the generic title.
 
-**Guest personalization** (`/wedding/:slug?to=Andi`) is handled entirely in the
-frontend. The backend never sees or stores `to`.
+### Protection against misuse
+
+- **Unguessable addresses.** `POST /admin/weddings` adds a random 6-character
+  suffix to the slug (`arga-nadia` → `arga-nadia-7k3p9q`, about 887 million
+  combinations). The response contains the final slug. A slug never changes after
+  creation (`PUT` ignores it), so links already sent keep working.
+- **Signed guest names.** Personal links look like `/wedding/<slug>?to=Andi&k=<signature>`.
+  `GET /weddings/:slug` returns `guest: { name }` only when `k` matches that name
+  and that wedding (HMAC-SHA256 with `GUEST_LINK_SECRET`); otherwise it returns
+  `guest: null`, and the invitation and the WhatsApp preview show the generic
+  greeting. Editing `?to=` therefore cannot show a fake name. Nothing is stored
+  per guest. Create links in bulk:
+  ```bash
+  curl -X POST http://localhost:8080/api/v1/admin/weddings/<id>/guest-links \
+    -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+    -d '{"guests":["Andi Pratama","Keluarga Bpk. Budi"]}'
+  # → { "data": [ { "name": "Andi Pratama", "url": "http://…/wedding/<slug>?to=Andi%20Pratama&k=…" }, … ] }
+  ```
+- **Anti-guessing.** Only requests for unknown slugs count. After 100 of them from
+  one IP within 15 minutes, every lookup from that IP gets `429` until the window
+  ends; blocking only unknown slugs would reveal the real ones. The limit is
+  generous because many mobile users share an IP (carrier NAT), and 100 tries per
+  15 minutes cannot realistically find a 6-character random suffix.
+- **Not indexed.** Invitation pages send `X-Robots-Tag: noindex, nofollow`, and
+  `index.html` has the matching meta tag.
 
 ### Errors
 
@@ -170,7 +195,7 @@ Validation errors (`422`) include per-field messages:
 | 400 | `INVALID_JSON` |
 | 401 | `UNAUTHORIZED`, `INVALID_TOKEN`, `TOKEN_EXPIRED`, `INVALID_CREDENTIALS` |
 | 404 | `NOT_FOUND`, `WEDDING_NOT_FOUND`, `EVENT_NOT_FOUND`, `STORY_NOT_FOUND`, `GALLERY_NOT_FOUND` |
-| 409 | `SLUG_TAKEN` |
+| 409 | `SLUG_TAKEN` (practically never, thanks to the random suffix) |
 | 422 | `VALIDATION_ERROR` |
 | 429 | `TOO_MANY_REQUESTS` |
 | 500 | `INTERNAL_ERROR` |

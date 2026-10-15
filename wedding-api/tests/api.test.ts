@@ -63,11 +63,11 @@ describe('POST /api/v1/weddings/:slug/rsvp', () => {
   it('stores a valid RSVP', async () => {
     const res = await request(app)
       .post(`/api/v1/weddings/${SEED_SLUG}/rsvp`)
-      .send({ guestName: 'Andi', attendance: 'attending', guestCount: 2, message: 'Selamat menempuh hidup baru' })
+      .send({ guestName: 'A/n', attendance: 'attending', guestCount: 2, message: 'Selamat menempuh hidup baru' })
     expect(res.status).toBe(201)
     expect(res.body.message).toBe('RSVP berhasil')
-    const { rows } = await pool.query('SELECT guest_name, guest_count FROM rsvps WHERE guest_name = $1', ['Andi'])
-    expect(rows).toEqual([{ guest_name: 'Andi', guest_count: 2 }])
+    const { rows } = await pool.query('SELECT guest_name, guest_count FROM rsvps WHERE guest_name = $1', ['A/n'])
+    expect(rows).toEqual([{ guest_name: 'A/n', guest_count: 2 }])
   })
 
   it('rejects invalid input with per-field errors', async () => {

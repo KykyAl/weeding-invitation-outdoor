@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type { Wedding } from '@/types'
 import { copy } from '@/locales/id'
 import { ApiError, getWedding, WeddingDataError } from '@/services'
+import { getGuestLinkParams } from '@/utils/guest'
 
 export type WeddingState =
   | { status: 'loading' }
@@ -27,7 +28,7 @@ export function useWedding(slug: string) {
 
   useEffect(() => {
     const controller = new AbortController()
-    getWedding(slug, controller.signal)
+    getWedding(slug, controller.signal, getGuestLinkParams(window.location.search))
       .then((wedding) => setState({ status: 'ready', wedding }))
       .catch((error: unknown) => {
         if (!controller.signal.aborted) setState(toErrorState(error))

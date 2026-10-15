@@ -116,6 +116,8 @@ export interface Wedding {
   music?: Music
   /** Cut-out photo (transparent PNG/WebP) shown instead of the illustrated couple. */
   couplePhoto?: ImageAsset
+  /** The guest's name — only present when the link's signature was valid. */
+  guestName?: string
   rsvp?: RsvpSettings
   /** Order of names in the headline. Defaults to groom first. */
   nameOrder?: 'groom-first' | 'bride-first'
